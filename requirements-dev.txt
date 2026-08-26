@@ -1,0 +1,21 @@
+# FunnelIQ - DEVELOPMENT dependencies
+# Everything needed to explore the data, train models, and run checks locally.
+# NOT installed on Railway - the deployed app only uses requirements.txt.
+#
+# Install with:  pip install -r requirements-dev.txt
+# (the -r line below pulls in the runtime packages too, so one command is enough)
+
+-r requirements.txt
+
+# --- Notebooks / exploration ---
+jupyter==1.1.1
+jupyterlab==4.6.3
+ipykernel==7.3.0
+
+# --- Plotting ---
+matplotlib==3.11.1
+seaborn==0.13.2
+
+# --- Quality checks (also run by GitHub Actions CI) ---
+pytest==9.1.1
+ruff==0.16.4

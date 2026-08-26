@@ -1,0 +1,26 @@
+# FunnelIQ - RUNTIME dependencies
+# These are the only packages the deployed app needs on Railway.
+# Development-only tools (Jupyter, plotting, tests) live in requirements-dev.txt
+# so that deploys stay small and fast.
+#
+# Versions are pinned exactly ("==") so the server installs the same code
+# that was tested locally. Install with:  pip install -r requirements.txt
+
+# --- Web API ---
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+
+# --- Supabase client (database + auth) ---
+supabase==2.31.0
+python-dotenv==1.2.3
+
+# --- Data handling at inference time ---
+pandas==3.0.5
+numpy==2.4.6
+
+# --- Model loading / prediction ---
+scikit-learn==1.9.0
+xgboost==3.2.0
+lightgbm==4.7.0
+catboost==1.2.10
+joblib==1.5.3

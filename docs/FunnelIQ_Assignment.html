@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FunnelIQ — Self-Directed Project Brief</title>
+<style>
+  :root{
+    --ink:#1a2230; --ink-soft:#43516b; --muted:#6b7890;
+    --bg:#ffffff; --band:#f4f7fb; --line:#dde5f0;
+    --brand:#2f6bff; --brand-dark:#1e3a8a; --accent:#0ea5a4;
+    --gold:#c98a00; --gold-bg:#fff6e0; --green:#0f9d58; --red:#d64545;
+    --code-bg:#f2f5fa;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; color:var(--ink); background:var(--bg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; font-size:16px;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:0 28px;}
+
+  /* Header */
+  header.hero{
+    background:linear-gradient(135deg,#12224b 0%,#2f6bff 100%);
+    color:#fff; padding:52px 0 46px;
+  }
+  header.hero .wrap{display:flex; flex-direction:column; gap:14px;}
+  .eyebrow{letter-spacing:2px; text-transform:uppercase; font-size:12px; font-weight:700; color:#bcd0ff;}
+  header.hero h1{margin:0; font-size:40px; line-height:1.1; letter-spacing:-0.5px;}
+  header.hero .sub{font-size:18px; color:#e4ecff; max-width:640px;}
+  .badges{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+  .badge{background:rgba(255,255,255,0.14); border:1px solid rgba(255,255,255,0.28);
+    padding:5px 12px; border-radius:20px; font-size:13px; font-weight:600;}
+  .meta-line{display:flex; flex-wrap:wrap; gap:22px; margin-top:10px; font-size:14px; color:#cddcff;}
+  .meta-line b{color:#fff;}
+
+  /* Sections */
+  main{padding:12px 0 60px;}
+  section{padding:30px 0; border-bottom:1px solid var(--line);}
+  h2{font-size:26px; margin:0 0 6px; color:var(--brand-dark); letter-spacing:-0.3px;}
+  h2 .num{color:var(--brand); font-weight:800; margin-right:10px;}
+  h3{font-size:18px; margin:22px 0 6px; color:var(--ink);}
+  h4{font-size:15px; margin:16px 0 4px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.5px;}
+  p{margin:8px 0;}
+  .lead{font-size:17px; color:var(--ink-soft);}
+  ul,ol{margin:8px 0 8px 4px; padding-left:22px;}
+  li{margin:5px 0;}
+  a{color:var(--brand); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  code{background:var(--code-bg); padding:1px 6px; border-radius:5px; font-size:0.9em;
+    font-family:"SF Mono",Menlo,Consolas,monospace; color:#334;}
+
+  /* Callouts */
+  .callout{border-radius:12px; padding:16px 18px; margin:18px 0; border:1px solid var(--line);}
+  .callout .tag{font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.6px; display:block; margin-bottom:4px;}
+  .callout.story{background:var(--band); border-left:5px solid var(--brand);}
+  .callout.warn{background:#fff3f3; border-left:5px solid var(--red);}
+  .callout.tip{background:#effaf6; border-left:5px solid var(--green);}
+  .callout.gold{background:var(--gold-bg); border-left:5px solid var(--gold);}
+  .callout.gold .tag{color:var(--gold);}
+  .callout.warn .tag{color:var(--red);}
+  .callout.tip .tag{color:var(--green);}
+  .callout.story .tag{color:var(--brand-dark);}
+
+  blockquote{margin:14px 0; padding:12px 18px; border-left:4px solid var(--brand);
+    background:var(--band); font-style:italic; color:var(--ink-soft); border-radius:0 8px 8px 0;}
+
+  /* Pillars */
+  .pillars{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px;}
+  .pillar{border:1px solid var(--line); border-radius:12px; padding:16px; background:#fff;}
+  .pillar .ico{font-size:22px;}
+  .pillar h3{margin:6px 0 4px; font-size:16px; color:var(--brand-dark);}
+  .pillar p{font-size:13.5px; color:var(--muted); margin:4px 0 0;}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:14px;}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  thead th{background:var(--brand-dark); color:#fff; font-weight:600; border-bottom:none;}
+  thead th:first-child{border-radius:8px 0 0 0;}
+  thead th:last-child{border-radius:0 8px 0 0;}
+  tbody tr:nth-child(even){background:var(--band);}
+  td code{white-space:nowrap;}
+
+  /* Task cards */
+  .task{border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:16px 0; background:#fff;}
+  .task .head{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .task .chip{background:var(--brand); color:#fff; font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px;}
+  .task .chip.reg{background:var(--accent);}
+  .task .chip.cls{background:#7c5cff;}
+  .task .chip.eda{background:var(--gold);}
+  .task h3{margin:0; font-size:17px;}
+  .task .goal{color:var(--ink-soft); margin:8px 0;}
+  .task .deliver{font-size:14px;}
+  .q{color:var(--muted); font-size:14px;}
+
+  /* TOC */
+  .toc{background:var(--band); border:1px solid var(--line); border-radius:12px; padding:16px 20px; margin:22px 0;}
+  .toc h4{margin:0 0 8px;}
+  .toc ol{columns:2; column-gap:32px; margin:0;}
+  .toc a{color:var(--ink-soft);}
+
+  footer{padding:26px 0; color:var(--muted); font-size:13px; text-align:center;}
+
+  @media print{
+    header.hero{background:var(--brand-dark) !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    section{page-break-inside:avoid;}
+    .task,.callout,.pillar{page-break-inside:avoid;}
+    thead th{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+  @media (max-width:680px){
+    .pillars{grid-template-columns:1fr;}
+    .toc ol{columns:1;}
+    header.hero h1{font-size:30px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Self-Directed Portfolio Project · Applied Machine Learning</span>
+    <h1>FunnelIQ</h1>
+    <p class="sub">Turn a marketing agency's raw funnel data into a deployed, decision-ready intelligence product — built with gradient boosting, shipped on real infrastructure, and locked behind a real login. Build it for yourself: no submission, no deadline, no grade.</p>
+    <div class="badges">
+      <span class="badge">XGBoost</span>
+      <span class="badge">LightGBM</span>
+      <span class="badge">CatBoost</span>
+      <span class="badge">GitHub</span>
+      <span class="badge">Supabase</span>
+      <span class="badge">Supabase Auth</span>
+      <span class="badge">Railway</span>
+    </div>
+    <div class="meta-line">
+      <span><b>Level:</b> Intermediate</span>
+      <span><b>Est. effort:</b> 30–45 hours, at your own pace</span>
+      <span><b>Type:</b> Self-directed · nothing to hand in</span>
+      <span><b>Dataset:</b> funnel_marketing_data.csv</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="toc">
+    <h4>What's in this brief</h4>
+    <ol>
+      <li><a href="#story">The scenario</a></li>
+      <li><a href="#mission">Your mission</a></li>
+      <li><a href="#dataset">The dataset</a></li>
+      <li><a href="#pillars">The three pillars</a></li>
+      <li><a href="#work">The analytical work</a></li>
+      <li><a href="#deliverables">What you'll build</a></li>
+      <li><a href="#rules">Principles &amp; good habits</a></li>
+      <li><a href="#resources">Resources</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. STORY -->
+  <section id="story">
+    <h2><span class="num">01</span>The scenario</h2>
+    <div class="callout story">
+      <span class="tag">Background</span>
+      <p><b>Northbound Media</b> is a 40-person performance-marketing agency. For two years they've tracked every step of their sales funnel: the ad money spent, the leads it generated, how many picked up the phone, how many survived each follow-up call, which deals closed, how long each client stayed, whether they bought more, and whether they sent a referral.</p>
+      <p>All of it lives in a single spreadsheet nobody fully trusts.</p>
+    </div>
+
+    <p>Last quarter, Northbound's founder sat down with the growth team after another six-figure ad month and said the quiet part out loud:</p>
+
+    <blockquote>"We're spending a fortune on ads, but I genuinely can't tell you what makes a customer stay, spend more, or refer a friend. We're optimizing on gut feel. Sales wants to cut follow-ups after the third call. Finance wants to slash the ad budget. Nobody has evidence. I need us to stop guessing and start <em>knowing</em> — and I need it as a tool the team can log into and actually use, not a slide from a data scientist that we forget in a week."</blockquote>
+
+    <p>That last sentence is the whole project. A notebook full of charts is <em>not</em> the goal. The founder needs a living product: an internal tool the team signs into, with data in a real database, models behind a real API, a dashboard the team can open in a browser, all running on infrastructure that stays up after you close your laptop. That is exactly the end-to-end a junior ML / data engineer is hired to own — and exactly what makes this a portfolio piece instead of a homework set.</p>
+
+    <div class="callout tip">
+      <span class="tag">Why this matters for your portfolio</span>
+      <p>Anyone can fit a model in a notebook. What gets you hired is proving you can take a messy business problem all the way to something deployed, secured behind a login, versioned, and usable by non-technical people. When you're done you'll have a public GitHub repo, a live URL, and a story you can tell in an interview.</p>
+    </div>
+  </section>
+
+  <!-- 2. MISSION -->
+  <section id="mission">
+    <h2><span class="num">02</span>Your mission</h2>
+    <p class="lead">Build and deploy <b>FunnelIQ</b> — a marketing-intelligence tool for Northbound Media's team.</p>
+    <p>By the end, FunnelIQ must be able to answer the founder's real questions:</p>
+    <ul>
+      <li><b>How long will a new customer stay?</b> (predict lifetime in months)</li>
+      <li><b>Who is likely to buy more?</b> (predict upsell probability)</li>
+      <li><b>Who will become a "super customer"</b> — someone who stays, spends, and refers? (a 0–100 score)</li>
+      <li><b>Where should the ad budget go</b> to maximize expected profit?</li>
+      <li><b>Are late follow-ups really a waste of time,</b> or is the sales manager wrong?</li>
+    </ul>
+    <p>And because this is an internal tool, all of it sits behind a <b>login screen</b> — only Northbound's team can get in. Each answer must be reachable through your deployed, signed-in application — not just printed once in a notebook cell. The <a href="#work">analytical work</a> section breaks these down into concrete requirements.</p>
+  </section>
+
+  <!-- 3. DATASET -->
+  <section id="dataset">
+    <h2><span class="num">03</span>The dataset</h2>
+    <p>You are given <code>funnel_marketing_data.csv</code> — one row per customer/campaign record. It is real-world messy: expect missing values and relationships that aren't as clean as you'd hope. Treat data cleaning as part of the job, not a nuisance.</p>
+    <table>
+      <thead><tr><th>Column</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>ad_budget</code></td><td>Monthly advertising spend (₪)</td></tr>
+        <tr><td><code>num_leads</code></td><td>Total leads generated</td></tr>
+        <tr><td><code>leads_answered</code></td><td>Leads that picked up the phone</td></tr>
+        <tr><td><code>leads_not_answered</code></td><td>Leads that didn't answer</td></tr>
+        <tr><td><code>followup_1</code> … <code>followup_5</code></td><td>Leads remaining after each follow-up round</td></tr>
+        <tr><td><code>not_closed</code></td><td>Leads that went through the funnel but didn't convert</td></tr>
+        <tr><td><code>closed</code></td><td>Number of deals closed</td></tr>
+        <tr><td><code>calls_to_closed</code></td><td>Average calls before closing a deal</td></tr>
+        <tr><td><code>calls_to_not_closed</code></td><td>Average calls before giving up</td></tr>
+        <tr><td><code>customer_acquisition_cost</code></td><td>Cost per acquired customer (₪)</td></tr>
+        <tr><td><code>ltv_months</code></td><td>Customer lifetime in months</td></tr>
+        <tr><td><code>purchased</code></td><td>Made an initial purchase? (1/0)</td></tr>
+        <tr><td><code>upsell</code></td><td>Bought additional services? (1/0)</td></tr>
+        <tr><td><code>cumulative_profit</code></td><td>Total profit generated from the customer (₪)</td></tr>
+        <tr><td><code>referred</code></td><td>Did the customer refer someone? (Yes/No)</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn">
+      <span class="tag">Think before you model</span>
+      <p>Some columns describe what happened <em>after</em> a customer's relationship played out (for example, total profit earned). Using an outcome to predict another outcome is <b>data leakage</b> and will make your model look brilliant in training and useless in production. The real skill here is deciding, per task, which features a business would actually have available at prediction time — and being able to defend that choice.</p>
+    </div>
+  </section>
+
+  <!-- 4. PILLARS -->
+  <section id="pillars">
+    <h2><span class="num">04</span>The three pillars</h2>
+    <p>FunnelIQ is not just a model — it's a shipped system. Three infrastructure pillars are the backbone. Your architecture is up to you, but each pillar should be genuinely used (a screenshot of a signup page is not "used").</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="ico">🐙</div>
+        <h3>GitHub</h3>
+        <p>Source of truth, collaboration, and automation live here.</p>
+      </div>
+      <div class="pillar">
+        <div class="ico">🗄️</div>
+        <h3>Supabase</h3>
+        <p>Postgres for the dataset <em>and</em> Auth for the login screen.</p>
+      </div>
+      <div class="pillar">
+        <div class="ico">🚂</div>
+        <h3>Railway</h3>
+        <p>Your service runs on a public URL that stays up.</p>
+      </div>
+    </div>
+
+    <h3>GitHub — version control &amp; automation</h3>
+    <ul>
+      <li>A public repository with a clear, professional <code>README.md</code> (project overview, architecture diagram or description, local setup steps, and the live URL).</li>
+      <li>A <b>meaningful commit history</b> — small, descriptive commits, not one giant "final" dump.</li>
+      <li>Use <b>feature branches</b> and open at least one <b>Pull Request</b> (even solo — it shows you know the workflow).</li>
+      <li>A <code>.gitignore</code> that keeps secrets, data dumps, and virtual-environments out of the repo. <b>No API keys or <code>.env</code> files may ever be committed.</li>
+      <li>A working <b>GitHub Actions</b> workflow that runs on every push (at minimum: install dependencies and run your tests/lint).</li>
+    </ul>
+
+    <h3>Supabase — data &amp; authentication</h3>
+    <p><b>Data layer:</b></p>
+    <ul>
+      <li>Provision a Supabase project and design a table (or tables) for the dataset. Include a schema file (<code>schema.sql</code>) in the repo.</li>
+      <li>Load the CSV into the database with a repeatable script — not by hand.</li>
+      <li>Your application must <b>read from Supabase at runtime</b> (for at least one feature, e.g. serving historical records or computing insights), using credentials from environment variables.</li>
+    </ul>
+    <p><b>Authentication — the login screen:</b></p>
+    <ul>
+      <li>Build a <b>login screen using Supabase Auth</b> (email + password at minimum). FunnelIQ is an internal tool for Northbound's team, so the app should sit behind a sign-in rather than being open to the world.</li>
+      <li>Handle the session properly: an unauthenticated visitor sees only the login screen; a signed-in user reaches the dashboard and predictions; <b>sign-out works</b> and clears the session.</li>
+      <li>Use the <b>public anon key</b> in the browser for the login flow — never expose the service key client-side. Keep any privileged operations server-side.</li>
+      <li>Tie it together with access control: enable <b>Row Level Security</b> and write policies so the database itself enforces that only authenticated users can read the data. For RLS to actually matter, user-facing reads should reach Supabase with the signed-in user's access token (or your API verifies the user's JWT before serving) — a backend that reads everything with the service key bypasses your policies.</li>
+    </ul>
+
+    <h3>Railway — deployment</h3>
+    <ul>
+      <li>Deploy your service to Railway so it's reachable at a public URL.</li>
+      <li>Secrets (Supabase keys, config) are set as <b>Railway environment variables</b>, never hard-coded.</li>
+      <li>Connect the Railway service to your GitHub repo so pushes trigger a redeploy.</li>
+      <li>Expose a health-check endpoint and confirm the deployment survives a restart.</li>
+    </ul>
+
+    <div class="callout tip">
+      <span class="tag">Suggested (not required) stack</span>
+      <p>A Python API (FastAPI or Flask) serving JSON endpoints plus a lightweight HTML/JS dashboard is a clean fit and deploys to Railway easily. Supabase's JavaScript auth client makes the login screen a small amount of front-end code — but you may use any stack you like. What counts is that the three pillars work together, not which framework you picked.</p>
+    </div>
+  </section>
+
+  <!-- 5. WORK -->
+  <section id="work">
+    <h2><span class="num">05</span>The analytical work</h2>
+    <p>Six work packages. Each one produces something your deployed FunnelIQ exposes (an endpoint, a dashboard panel, or a documented finding). What matters is <b>rigor and reasoning</b>, not hitting a magic accuracy number — an honest model with a clear-eyed evaluation beats an inflated one every time. Do them in order or cherry-pick the ones you want to practice.</p>
+
+    <div class="task">
+      <div class="head"><span class="chip eda">Package 1</span><h3>Exploration &amp; cleaning</h3></div>
+      <p class="goal">Understand the data before you trust it.</p>
+      <p class="deliver"><b>Build:</b> a short written findings note (in the README or a <code>/docs</code> file) covering missing-value handling, a correlation analysis against <code>cumulative_profit</code>, the shape of the <code>ad_budget</code> → <code>num_leads</code> relationship, and conversion rate (<code>closed / num_leads</code>) across budget tiers — Low (≤1500), Mid (2000–5000), High (&gt;5000).</p>
+      <p class="q"><b>Questions to answer:</b> How many rows are incomplete, and how did you handle them? Does more budget buy proportionally more leads, or do you see diminishing returns? Which budget tier converts best — and does that surprise you?</p>
+    </div>
+
+    <div class="task">
+      <div class="head"><span class="chip reg">Package 2</span><h3>Predict customer lifetime (regression)</h3></div>
+      <p class="goal">Target: <code>ltv_months</code>. "Can we predict how long a customer will stay?"</p>
+      <p class="deliver"><b>Build:</b> three trained models — XGBoost, LightGBM, and CatBoost — compared with <b>5-fold cross-validation</b> on RMSE and R². Extract and compare feature importances across all three. Expose the prediction through your app.</p>
+      <p class="q"><b>Questions to answer:</b> Should <code>cumulative_profit</code> be a feature here? Justify it. Which features dominate, and do the three models agree? In two sentences, what's the strongest lever on customer longevity, and what should Northbound do about it?</p>
+    </div>
+
+    <div class="task">
+      <div class="head"><span class="chip cls">Package 3</span><h3>Predict upsell probability (classification)</h3></div>
+      <p class="goal">Target: <code>upsell</code>. "Which customers are most likely to buy more?"</p>
+      <p class="deliver"><b>Build:</b> three classifiers with 5-fold <b>stratified</b> CV. Check the class balance first and decide whether <b>class-imbalance handling</b> (e.g. <code>scale_pos_weight</code> or class weights) is warranted — justify either way. Report Accuracy, Precision, Recall, F1 and ROC-AUC, alongside the majority-class baseline. Plot importances for your best model.</p>
+      <p class="q"><b>Questions to answer:</b> Is accuracy a sufficient metric here? What does the majority-class baseline score, and how much does your model add? Is upsell driven by one feature or a combination? Design a simple business rule (e.g. "if LTV &gt; X and CAC &lt; Y, flag for outreach") and compare it against your model's predictions — where does the rule win or lose?</p>
+    </div>
+
+    <div class="task">
+      <div class="head"><span class="chip cls">Package 4</span><h3>The "super customer" score</h3></div>
+      <p class="goal">Target: <code>referred</code>. Super customers stay long, buy more, and bring in new clients.</p>
+      <p class="deliver"><b>Build:</b> a CatBoost classifier — engineer a categorical budget-tier feature (Low/Mid/High) and let CatBoost handle it natively with <b>hyperparameter tuning</b> (search over learning rate, depth, and iterations). Then build a scoring pipeline: given a new customer's early funnel data, output a <b>0–100 likelihood</b> of becoming a super customer, served by your app.</p>
+      <p class="q"><b>Questions to answer:</b> Profile the super customers (referred = Yes, upsell = 1, long tenure): what share of total profit do they represent, and what's their average acquisition cost? How could Northbound spot them earlier?</p>
+    </div>
+
+    <div class="task">
+      <div class="head"><span class="chip eda">Package 5</span><h3>The follow-up paradox</h3></div>
+      <p class="goal">The sales manager claims: "After the 3rd follow-up, we're just wasting time." Is that true?</p>
+      <p class="deliver"><b>Build:</b> the dropout rate at each follow-up stage (<code>followup_1</code>→<code>followup_5</code>), visualized, plus a data-driven recommendation surfaced in the dashboard.</p>
+      <p class="q"><b>Questions to answer:</b> At which stage does dropout behave unexpectedly? For deals that eventually closed, how many follow-ups did they typically take? Should Northbound change its follow-up policy — yes or no, and why?</p>
+    </div>
+
+    <div class="task">
+      <div class="head"><span class="chip reg">Package 6</span><h3>Budget optimization challenge</h3></div>
+      <p class="goal">Northbound has ₪50,000/month to spend and currently spreads it evenly.</p>
+      <p class="deliver"><b>Build:</b> a model that predicts <code>cumulative_profit</code>, used to simulate allocation strategies built from campaign sizes the data actually covers (₪500–₪20,000) — e.g. 2 × 20k + 10k vs. 10 × 5k vs. 25 × 2k vs. 100 × 500 — and a recommendation for which maximizes expected total profit. Your simulator only knows each campaign's budget, so decide how to fill in the other features (a typical funnel profile per budget level is one reasonable approach). Expose the simulator in your app.</p>
+      <p class="q"><b>Questions to answer:</b> Based on what your model learned about diminishing returns, does concentrating or spreading spend win? What would you tell the founder to do next month?</p>
+    </div>
+  </section>
+
+  <!-- 6. WHAT YOU'LL BUILD -->
+  <section id="deliverables">
+    <h2><span class="num">06</span>What you'll build</h2>
+    <p>There's nothing to hand in — this is yours. But if you finish, you'll walk away with a set of artifacts that are genuinely worth showing off in an interview or on a résumé:</p>
+    <ol>
+      <li><b>A public GitHub repository</b> — code, <code>README.md</code>, <code>schema.sql</code>, a CI workflow, and a commit history that shows how you worked.</li>
+      <li><b>A live application URL</b> on Railway — a real link you can share that actually answers the founder's questions.</li>
+      <li><b>A login-gated dashboard</b> — a real Supabase Auth sign-in screen, not an open page, so the app behaves like the internal tool it's meant to be.</li>
+      <li><b>A short write-up</b> (nice to keep as <code>REPORT.md</code>) capturing your findings and the business recommendations from the work packages — the part that proves you can turn models into decisions.</li>
+      <li><b>A quick demo</b> — an optional 3–5 minute screen-recording of the deployed app in action. Future-you will thank present-you when it's time to talk about the project.</li>
+    </ol>
+    <div class="callout gold">
+      <span class="tag">You'll know it's done when…</span>
+      <p>A stranger can open your live URL, sign in, get a prediction for a new customer, see the follow-up and budget insights, and read your recommendations — without you touching anything. Your repo tells them how it was built and how to run it themselves. That's the bar worth aiming for, entirely for your own satisfaction.</p>
+    </div>
+  </section>
+
+  <!-- 7. PRINCIPLES -->
+  <section id="rules">
+    <h2><span class="num">07</span>Principles &amp; good habits</h2>
+    <p>No one's checking, but these are the habits that separate a toy project from one that looks professional — worth building in from the start.</p>
+    <ul>
+      <li><b>Reproducibility.</b> Anyone (including future-you) should be able to clone the repo, follow the README, and stand it up. Pin your dependencies.</li>
+      <li><b>Secrets stay secret.</b> Everything sensitive goes in environment variables and is excluded by <code>.gitignore</code> — never commit an API key or <code>.env</code>. This one's a real-world habit worth locking in now.</li>
+      <li><b>Anon key in the browser, service key on the server.</b> The login screen uses Supabase's public anon key; the service-role key never leaves your backend. Getting this split right is the whole point of the auth exercise.</li>
+      <li><b>No leakage without justification.</b> If you include a feature that looks like an outcome, write down why it's legitimately available at prediction time. This is the single most valuable modeling instinct in the whole project.</li>
+      <li><b>Cheap tiers are plenty.</b> Supabase's free tier covers this project. Railway offers a 30-day trial credit (no credit card) and after that a low-cost plan (a few dollars a month) — check the current pricing page; Render or Fly.io are drop-in substitutes for this pillar if you prefer.</li>
+      <li><b>Use AI tools if you like — but understand what you ship.</b> The point is to be able to explain every line, because that's what makes it yours.</li>
+      <li><b>Credit what you borrow.</b> Note snippets from docs or tutorials in comments or the README. Good habit, and it helps you find them again later.</li>
+    </ul>
+  </section>
+
+  <!-- 8. RESOURCES -->
+  <section id="resources">
+    <h2><span class="num">08</span>Resources</h2>
+    <ul>
+      <li><b>Gradient boosting:</b> XGBoost, LightGBM, and CatBoost documentation (installation, defaults, feature importance, categorical handling).</li>
+      <li><b>Supabase data:</b> the official docs on creating a project, the SQL editor, table setup, Row Level Security, and the Python client.</li>
+      <li><b>Supabase Auth:</b> the docs on email/password sign-in, the JavaScript auth client, and managing user sessions — this is what powers your login screen.</li>
+      <li><b>Railway:</b> the deploy-from-GitHub guide, environment variables, and health checks.</li>
+      <li><b>API framework:</b> FastAPI or Flask quick-start guides if you go the Python route.</li>
+      <li><b>Git workflow:</b> any solid primer on feature branches, pull requests, and writing good commit messages.</li>
+    </ul>
+    <div class="callout tip">
+      <span class="tag">One piece of advice</span>
+      <p>Get the boring skeleton deployed on day one — an empty app that returns "hello" from Railway, reading nothing but a health check. Deployment and auth problems are much easier to debug when there's almost no code. Then grow the project inside a pipeline that already works.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>FunnelIQ · Self-directed portfolio project · Dataset: funnel_marketing_data.csv (3,500 records)</p>
+</footer>
+
+</body>
+</html>

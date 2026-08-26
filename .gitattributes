@@ -1,0 +1,12 @@
+# Normalise line endings.
+# Windows uses CRLF, Linux/macOS use LF, and the deployment target (Railway)
+# is Linux. Storing everything as LF in git keeps diffs clean no matter which
+# machine a change was made on.
+* text=auto eol=lf
+
+# Binary files must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.pkl binary
+*.joblib binary
+*.cbm binary
