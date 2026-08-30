@@ -219,12 +219,45 @@
     </div>
   </section>
 
+  <section id="p3">
+    <div class="section-head"><span class="section-num">03</span><h2>חבילה 3 — סיווג: upsell</h2></div>
+
+    <div class="card">
+      <h3>שלושה מודלים, סיווג הפעם</h3>
+      <table>
+        <thead><tr><th>מודל</th><th class="num">Accuracy</th><th class="num">ROC-AUC</th></tr></thead>
+        <tbody>
+          <tr><td class="ltr">XGBoost</td><td class="num">0.717</td><td class="num">0.756</td></tr>
+          <tr><td class="ltr">LightGBM</td><td class="num">0.732</td><td class="num">0.766</td></tr>
+          <tr><td class="ltr">CatBoost</td><td class="num hi">0.755</td><td class="num hi">0.781</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">נבחר שוב <b>CatBoost</b>. מעל baseline נאיבי של 53.6% (ניחוש המחלקה הנפוצה) — שיפור אמיתי של כ-22 נקודות.</p>
+    </div>
+
+    <div class="card">
+      <h3>★ הממצא המרכזי: תיקנו את הגדרת הבעיה עצמה</h3>
+      <p class="headline"><code>purchased=0</code> ⇒ <code>upsell=0</code> תמיד (337/337 ללא יוצא מהכלל) — הגיוני לחלוטין (אי אפשר לשדרג מי שלא קנה), אבל זה אומר שהמודל הראשוני "פתר" חלקית את השאלה הקלה — "האם קנה בכלל" — ולא את השאלה העסקית האמיתית. <b>סיננו ל-purchasers בלבד</b> והרצנו מחדש: ROC-AUC ירד מ-0.821 ל-0.781 — ביצועים כנים במקום מנופחים.</p>
+    </div>
+
+    <div class="card">
+      <h3>קשר בין חבילות: אותו סיגנל, שני יעדים שונים</h3>
+      <p class="headline"><code>calls_to_closed</code> (כמה שיחות נדרשו לסגירה) מוביל גם כאן (26-44% מהחשיבות) — בדיוק כמו בחבילה 2 עבור <code>ltv_months</code>. פחות שיחות לסגירה חוזה גם ערך-לקוח ארוך-טווח <b>וגם</b> סיכוי גבוה יותר לשדרוג. דפוס עקבי, לא רעש חד-פעמי.</p>
+    </div>
+
+    <div class="principles">
+      <span class="principle"><b>07</b> leakage תלוי ב-target — לבדוק מחדש בכל חבילה</span>
+      <span class="principle"><b>08</b> חשיבות feature קיצונית יכולה לחשוף הגדרת-בעיה שגויה, לא רק leakage</span>
+      <span class="principle"><b>09</b> מודל סיווג = הסתברות + סף, לא רק 0/1</span>
+    </div>
+  </section>
+
   <section id="next">
     <div class="section-head"><span class="section-num">·</span><h2>מצב הפרויקט</h2></div>
     <ul class="roadmap">
       <li class="done">תשתית + חבילה 1 — חקירה וניקוי</li>
       <li class="done">חבילה 2 — רגרסיה: ltv_months</li>
-      <li>חבילה 3 — סיווג: upsell</li>
+      <li class="done">חבילה 3 — סיווג: upsell</li>
       <li>חבילה 4 — ציון "לקוח על"</li>
       <li>חבילה 5 — פרדוקס שיחות המעקב</li>
       <li>חבילה 6 — אופטימיזציית תקציב</li>
