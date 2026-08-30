@@ -179,11 +179,51 @@
     </div>
   </section>
 
+  <section id="p2">
+    <div class="section-head"><span class="section-num">02</span><h2>חבילה 2 — רגרסיה: ltv_months</h2></div>
+
+    <div class="card">
+      <h3>שלושה מודלים, אותם 5 folds</h3>
+      <table>
+        <thead><tr><th>מודל</th><th class="num">RMSE</th><th class="num">R²</th></tr></thead>
+        <tbody>
+          <tr><td class="ltr">XGBoost</td><td class="num">3.22</td><td class="num">0.933</td></tr>
+          <tr><td class="ltr">LightGBM</td><td class="num">2.99</td><td class="num">0.942</td></tr>
+          <tr><td class="ltr">CatBoost</td><td class="num hi">2.95</td><td class="num hi">0.944</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">נבחר <b>CatBoost</b> — אבל בהפרש קטן משני האחרים. המודל טועה בממוצע ב-~3 חודשים, על טווח <code>ltv_months</code> של 1–56 (ממוצע 22, סטיית תקן 12.5).</p>
+    </div>
+
+    <div class="card">
+      <h3>★ הממצא המרכזי: פיצ&#39;ר אחד שולט כמעט לבד</h3>
+      <p class="headline"><code>calls_to_closed</code> (כמה שיחות נדרשו כדי לסגור את העסקה) לוקח לבדו ~53–60% מחשיבות ה-feature ב-XGBoost וב-CatBoost, ומתואם <b>-0.65</b> עם <code>ltv_months</code> — פחות שיחות לסגירה, לקוח שנשאר יותר זמן. לא <b>leakage</b> קלאסי (זה קורה לפני שתקופת ה-LTV מתחילה), אבל ריכוז כזה קיצוני מדי מכדי להיות טבעי — כנראה תוצר של איך הדאטה הסינתטי הזה נבנה.</p>
+    </div>
+
+    <div class="card">
+      <h3>בדיקת חוסן: מה קורה בלי הפיצ&#39;ר הדומיננטי</h3>
+      <table>
+        <thead><tr><th></th><th class="num">RMSE</th><th class="num">R²</th></tr></thead>
+        <tbody>
+          <tr><td>עם <code>calls_to_closed</code> + <code>closed</code></td><td class="num hi">2.95</td><td class="num hi">0.944</td></tr>
+          <tr><td>בלעדיהם</td><td class="num">4.85</td><td class="num">0.848</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">הביצועים יורדים משמעותית אבל <b>לא קורסים</b> — שאר הפיצ&#39;רים (תקציב, לידים, ה-followups) עדיין מכילים סיגנל אמיתי ועצמאי. תובנה עסקית ל-Northbound Media: <b>איכות תהליך הסגירה</b> חוזה ערך-לקוח ארוך-טווח הרבה יותר טוב מתקציב או נפח לידים.</p>
+    </div>
+
+    <div class="principles">
+      <span class="principle"><b>04</b> CV קבוע (אותם folds) = השוואה הוגנת בין מודלים</span>
+      <span class="principle"><b>05</b> חשיבות feature קיצונית = דגל לבדיקה, לא בהכרח leakage</span>
+      <span class="principle"><b>06</b> בדקו רגישות (הסירו ובדקו שוב) לפני שסומכים על תוצאה</span>
+    </div>
+  </section>
+
   <section id="next">
     <div class="section-head"><span class="section-num">·</span><h2>מצב הפרויקט</h2></div>
     <ul class="roadmap">
       <li class="done">תשתית + חבילה 1 — חקירה וניקוי</li>
-      <li>חבילה 2 — רגרסיה: ltv_months</li>
+      <li class="done">חבילה 2 — רגרסיה: ltv_months</li>
       <li>חבילה 3 — סיווג: upsell</li>
       <li>חבילה 4 — ציון "לקוח על"</li>
       <li>חבילה 5 — פרדוקס שיחות המעקב</li>
