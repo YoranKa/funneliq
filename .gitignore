@@ -49,6 +49,13 @@ data/exports/
 *.db
 
 # ---------------------------------------------------------------
+# CatBoost training logs
+# Auto-generated in the working directory every time CatBoostRegressor
+# fits - just run metadata/plots, not something to version.
+# ---------------------------------------------------------------
+catboost_info/
+
+# ---------------------------------------------------------------
 # OS / editor noise
 # ---------------------------------------------------------------
 .DS_Store
