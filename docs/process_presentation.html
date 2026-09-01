@@ -249,13 +249,47 @@
     </div>
   </section>
 
+  <section id="p4">
+    <div class="section-head"><span class="section-num">04</span><h2>חבילה 4 — ציון "לקוח על"</h2></div>
+
+    <div class="card">
+      <h3>label שבנינו בעצמנו + כיוונון היפר-פרמטרים</h3>
+      <p class="headline">"לקוח-על" לא קיים בדאטה — הגדרנו: <code>referred=Yes</code> וגם <code>upsell=1</code> וגם שליש עליון של <code>ltv_months</code> (18.3% מהלקוחות). <b>CatBoost</b> עם <code>budget_tier</code> קטגורי מהונדס (Low/Mid/High), מכוונן ב-<code>RandomizedSearchCV</code> (20 שילובים, 5-fold, ROC-AUC).</p>
+      <table>
+        <thead><tr><th>מדד</th><th class="num">ערך</th></tr></thead>
+        <tbody>
+          <tr><td>ROC-AUC (CV)</td><td class="num hi">0.813</td></tr>
+          <tr><td>עשירון עליון לפי ציון</td><td class="num">42.9% לקוחות-על (בסיס: 18.3%)</td></tr>
+          <tr><td>חצי תחתון לפי ציון</td><td class="num">~0% לקוחות-על</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">בסף ברירת המחדל 0.5 המודל לא חוצה אף פעם (precision/recall/F1 = 0) — ותקין: אופטימיזציה ל-ROC-AUC מייצרת <b>דירוג</b> טוב, לא סיווג בינארי, וזה בדיוק המוצר שהתבקשנו לבנות (ציון 0-100, לא כן/לא).</p>
+    </div>
+
+    <div class="card">
+      <h3>★ הממצא המרכזי: מעט לקוחות, הרבה רווח — ובזול</h3>
+      <p class="headline">18.3% מהלקוחות הם "לקוח-על" — אבל הם מייצרים <b>39.6%</b> מהרווח המצטבר הכולל. ובניגוד לאינטואיציה: העלות הממוצעת לרכוש אותם <b>נמוכה יותר</b>, לא גבוהה יותר — 1,000 מול 1,452 (פי 0.69) עבור שאר הלקוחות. הלקוחות הכי טובים לא היו יקרים להשגה.</p>
+    </div>
+
+    <div class="card">
+      <h3>קשר בין חבילות: אותו סיגנל, פעם שלישית</h3>
+      <p class="headline"><code>budget_tier</code> (הפיצ'ר הקטגורי שהנדסנו) יצא עם 0% חשיבות — הוא נגזר במלואו מ-<code>ad_budget</code> הרציף, אז ברגע שהעמודה הרציפה זמינה למודל אין לגרסה המקוטלגת מה להוסיף (תוצאה שלילית שימושית ללמידה). ומעניין יותר: <code>followup_1..5</code> כולם <b>נמוכים</b> יותר אצל לקוחות-על — פחות מגעים, לא יותר, מנבא הצלחה. אותו דפוס "פחות שכנוע נדרש = תוצאה טובה יותר" שראינו עם <code>calls_to_closed</code> בחבילות 2 ו-3, עכשיו בפעם השלישית.</p>
+    </div>
+
+    <div class="principles">
+      <span class="principle"><b>10</b> חיפוש היפר-פרמטרים ממטב את המדד שבחרת — לא בהכרח את הסף שתשתמשו בו בפועל</span>
+      <span class="principle"><b>11</b> פיצ'ר מהונדס יכול להיות מיותר לגמרי אם המקור הרציף כבר בפנים</span>
+      <span class="principle"><b>12</b> "פחות מאמץ נדרש מהלקוח" חוזר כסיגנל עקבי לאורך שלוש חבילות שונות</span>
+    </div>
+  </section>
+
   <section id="next">
     <div class="section-head"><span class="section-num">·</span><h2>מצב הפרויקט</h2></div>
     <ul class="roadmap">
       <li class="done">תשתית + חבילה 1 — חקירה וניקוי</li>
       <li class="done">חבילה 2 — רגרסיה: ltv_months</li>
       <li class="done">חבילה 3 — סיווג: upsell</li>
-      <li>חבילה 4 — ציון "לקוח על"</li>
+      <li class="done">חבילה 4 — ציון "לקוח על"</li>
       <li>חבילה 5 — פרדוקס שיחות המעקב</li>
       <li>חבילה 6 — אופטימיזציית תקציב</li>
       <li>Supabase — מסד נתונים + התחברות</li>
