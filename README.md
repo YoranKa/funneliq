@@ -100,13 +100,13 @@ Python 3.11 · pandas · scikit-learn · XGBoost · LightGBM · CatBoost · Fast
 ## Progress
 
 - [x] Project structure, git repository, pinned environment
-- [ ] Data exploration and cleaning
+- [x] Data exploration and cleaning
 - [ ] Deployed skeleton app (Railway)
 - [ ] Supabase database + data loading script
 - [ ] Supabase Auth login
-- [ ] Customer-lifetime model
-- [ ] Upsell model
-- [ ] Super-customer score
-- [ ] Follow-up analysis
-- [ ] Budget optimizer
+- [x] Customer-lifetime model
+- [x] Upsell model
+- [x] Super-customer score
+- [x] Follow-up analysis
+- [x] Budget optimizer
 - [ ] CI workflow
