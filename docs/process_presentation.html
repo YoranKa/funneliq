@@ -329,6 +329,59 @@
     </div>
   </section>
 
+  <section id="p6">
+    <div class="section-head"><span class="section-num">06</span><h2>חבילה 6 — אופטימיזציית תקציב</h2></div>
+
+    <div class="card">
+      <h3>מודל על כל תוצאות הקמפיין, לא רק early-funnel</h3>
+      <p class="headline">בשונה מחבילות 2-4: הסימולטור מכיר רק את התקציב של קמפיין היפותטי, אז אימנו מודל על <b>כל</b> תוצאות המשפך ההיסטוריות (leads, מעקבים, סגירות), ובזמן סימולציה ממלאים פיצ'רים לא-ידועים בערכים טיפוסיים לפי רמת תקציב. חריגים מ-<code>cumulative_profit</code>: <code>ltv_months</code> ו-<code>upsell</code> (דליפה מבנית, כמו שנקבע בחבילה 1).</p>
+      <table>
+        <thead><tr><th>מודל</th><th class="num">RMSE</th><th class="num">R²</th></tr></thead>
+        <tbody>
+          <tr><td><b>LightGBM</b></td><td class="num hi">5,254</td><td class="num hi">0.775</td></tr>
+          <tr><td>CatBoost</td><td class="num">5,396</td><td class="num">0.765</td></tr>
+          <tr><td>XGBoost</td><td class="num">6,044</td><td class="num">0.709</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">לראשונה בפרויקט <b>LightGBM מנצח</b>, לא CatBoost. תפסנו גם באג: ברירת המחדל של LightGBM ל-<code>feature_importances_</code> היא ספירת פיצולים, לא gain כמו השניים האחרים — לפני התיקון זה הראה תמונה מוטעית לגמרי (purchased 2.8% אצל LightGBM מול 69% אצל XGBoost). אחרי תיקון: כל השלושה מסכימים ש-<code>calls_to_closed</code>+<code>purchased</code> מסבירים מעל 90%.</p>
+    </div>
+
+    <div class="card">
+      <h3>★ הממצא המרכזי: נקודת מתיקה, לא "קטן זה טוב"</h3>
+      <table>
+        <thead><tr><th>תקציב לקמפיין</th><th class="num">רווח ממוצע לקמפיין</th></tr></thead>
+        <tbody>
+          <tr><td class="ltr">₪500</td><td class="num">₪1,212</td></tr>
+          <tr><td class="ltr">₪2,000</td><td class="num hi">₪21,749</td></tr>
+          <tr><td class="ltr">₪5,000</td><td class="num hi">₪21,725</td></tr>
+          <tr><td class="ltr">₪10,000</td><td class="num">₪5,107</td></tr>
+          <tr><td class="ltr">₪20,000</td><td class="num">₪4,762</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">רווח פר-קמפיין <b>שיא בטווח ₪2,000–5,000</b> וקורס משני הצדדים — לא מגמה חד-כיוונית. אימות מול נתונים גולמיים (לא רק המודל) הראה את אותה תבנית בדיוק. מתכתב עם חבילה 1: Mid ממיר הכי טוב (8.5%), אבל כאן ברמת הרווח בפועל ההבדל דרמטי הרבה יותר.</p>
+    </div>
+
+    <div class="card">
+      <h3>סימולציית ₪50,000: 25×₪2,000 מנצחת — עם אזהרה כנה</h3>
+      <table>
+        <thead><tr><th>אסטרטגיה</th><th class="num">רווח צפוי</th><th class="num">ROI</th></tr></thead>
+        <tbody>
+          <tr><td>25×₪2k</td><td class="num hi">₪561k</td><td class="num hi">11.2x</td></tr>
+          <tr><td>10×₪5k</td><td class="num">₪258k</td><td class="num">5.2x</td></tr>
+          <tr><td>100×₪500</td><td class="num">₪394k <span style="color:var(--muted); font-size:11.5px;">(לא אמין)</span></td><td class="num">7.9x</td></tr>
+          <tr><td>2×₪20k+₪10k</td><td class="num">₪14k</td><td class="num">0.28x</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">בדקנו כל תוצאה גם מול ממוצע היסטורי גולמי (בלי מודל בכלל). 25×₪2k, 10×₪5k ו-2×₪20k+₪10k תואמים בטווח ~15%. אבל <b>100×₪500 התברר כמנופח פי 3</b> (₪394k מודל מול ₪121k בנתונים גולמיים) — ה"פרופיל הטיפוסי" ל-bucket הזה נשען על קמפיינים שמוציאים עד ₪999 בפועל, ויוצר קומבינציה לא ריאלית כשכופים תקציב מדויק של ₪500. <b>המלצה ל-Northbound:</b> לפרק את ₪50,000 ל-~10–25 קמפיינים של ₪2,000–5,000, לא הפיזור השווה הנוכחי.</p>
+    </div>
+
+    <div class="principles">
+      <span class="principle"><b>16</b> לפעמים המודל הטוב ביותר משתנה — לא תמיד אותו ניצחון קבוע</span>
+      <span class="principle"><b>17</b> "ממוצע לפי bucket" יכול ליצור קומבינציית פיצ'רים לא-ריאלית בקצוות הטווח</span>
+      <span class="principle"><b>18</b> תמיד לאמת תחזית מודל מול ממוצע גולמי פשוט — חוסר הסכמה הוא איתות אמיתי</span>
+    </div>
+  </section>
+
   <section id="next">
     <div class="section-head"><span class="section-num">·</span><h2>מצב הפרויקט</h2></div>
     <ul class="roadmap">
@@ -337,7 +390,7 @@
       <li class="done">חבילה 3 — סיווג: upsell</li>
       <li class="done">חבילה 4 — ציון "לקוח על"</li>
       <li class="done">חבילה 5 — פרדוקס שיחות המעקב</li>
-      <li>חבילה 6 — אופטימיזציית תקציב</li>
+      <li class="done">חבילה 6 — אופטימיזציית תקציב</li>
       <li>Supabase — מסד נתונים + התחברות</li>
       <li>Railway — פריסה</li>
     </ul>
