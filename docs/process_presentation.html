@@ -283,6 +283,52 @@
     </div>
   </section>
 
+  <section id="p5">
+    <div class="section-head"><span class="section-num">05</span><h2>חבילה 5 — פרדוקס שיחות המעקב</h2></div>
+
+    <div class="card">
+      <h3>נשירה לא-מונוטונית לאורך המשפך</h3>
+      <p class="headline">מיפינו את מבנה המשפך: <code>leads_answered → followup_1 → ... → followup_5 → (closed + not_closed)</code>, ואישרנו ש-<code>followup_5 == not_closed + closed</code> בכל שורה — הסגירה נספרת רק בסוף, לא לאורך הדרך. חישבנו נשירה בכל שלב בשתי שיטות בלתי-תלויות (ממוצע לפי שורה וסכום כולל) — אותה תוצאה בדיוק.</p>
+      <table>
+        <thead><tr><th>שלב</th><th class="num">נשירה</th></tr></thead>
+        <tbody>
+          <tr><td>leads_answered → followup_1</td><td class="num">22%</td></tr>
+          <tr><td>followup_1 → followup_2</td><td class="num">26%</td></tr>
+          <tr><td>followup_2 → followup_3</td><td class="num">19%</td></tr>
+          <tr><td>followup_3 → followup_4</td><td class="num hi">10%</td></tr>
+          <tr><td>followup_4 → followup_5</td><td class="num hi">30%</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">הנשירה לא עולה בהדרגה כפי שהאינטואיציה "יותר שיחות = יותר בזבוז" מרמזת. השלב שבין שיחה 3 ל-4 הוא דווקא <b>הכי יעיל</b> מכל החמישה (10%, נמוך אפילו מהשלב הראשון) — ואז השלב הבא קופץ ל-30%, הגבוה ביותר. ההפתעה היא לא "אחרי שיחה 3" — היא הפער הספציפי בין שיחה 4 ל-5.</p>
+    </div>
+
+    <div class="card">
+      <h3>★ הממצא המרכזי: הפרדוקס האמיתי הוא בערך, לא בנפח</h3>
+      <p class="headline">מבין העסקאות שנסגרו (3,318 מתוך 3,500), ההתפלגות של "כמה שיחות זה לקח" <b>דו-שיאית</b>: 31% נסגרות תוך 2 שיחות, אבל 21% (690 עסקאות) דווקא צריכות את כל 5 השיחות — ויתור אחרי שיחה 3 מוותר על רבע מהעסקאות, לא רק על שאריות. אבל הרווח הממוצע לעסקה צונח בדיוק שם.</p>
+      <table>
+        <thead><tr><th>שיחות עד סגירה</th><th class="num">רווח ממוצע לעסקה</th></tr></thead>
+        <tbody>
+          <tr><td>1–2</td><td class="num hi">~₪8,200</td></tr>
+          <tr><td>3</td><td class="num">₪6,278</td></tr>
+          <tr><td>4</td><td class="num">₪2,255</td></tr>
+          <tr><td>5+</td><td class="num">~₪1,300–1,800</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">ירידה של 64% ברווח-לעסקה בין שיחה 3 ל-4, עם קורלציה שלילית חזקה (<b>r = −0.61</b>) בין מספר השיחות לרווח לעסקה.</p>
+    </div>
+
+    <div class="card">
+      <h3>קשר בין חבילות: אותו סיגנל, פעם רביעית</h3>
+      <p class="headline">גם כאן — כמו בחבילות 2, 3 ו-4 — יותר מגעים קשורים לתוצאה פחות טובה. <b>המלצה ל-Northbound:</b> לא לבטל שיחות מעקב אחרי שיחה 3 באופן גורף (זה יעלה כרבע מהעסקאות) — אבל גם לא להתעלם מכך שערכן נמוך יותר. להשתמש במודלים שכבר נבנו (LTV / upsell / ציון לקוח-על) כדי לתעדף אילו לידים שווה להמשיך לרדוף אחרי שיחה 3, במקום כלל אחיד לכולם.</p>
+    </div>
+
+    <div class="principles">
+      <span class="principle"><b>13</b> נשירה לא חייבת להיות מונוטונית — לבדוק כל שלב בנפרד, לא להניח מגמה</span>
+      <span class="principle"><b>14</b> התפלגות דו-שיאית מתחת לממוצע/מדיאן יכולה להסתיר שתי אוכלוסיות שונות לגמרי</span>
+      <span class="principle"><b>15</b> "0" בעמודת ממוצע יכול להיות placeholder לא-מוגדר, לא ערך אמיתי — לבדוק לפני שסומכים</span>
+    </div>
+  </section>
+
   <section id="next">
     <div class="section-head"><span class="section-num">·</span><h2>מצב הפרויקט</h2></div>
     <ul class="roadmap">
@@ -290,7 +336,7 @@
       <li class="done">חבילה 2 — רגרסיה: ltv_months</li>
       <li class="done">חבילה 3 — סיווג: upsell</li>
       <li class="done">חבילה 4 — ציון "לקוח על"</li>
-      <li>חבילה 5 — פרדוקס שיחות המעקב</li>
+      <li class="done">חבילה 5 — פרדוקס שיחות המעקב</li>
       <li>חבילה 6 — אופטימיזציית תקציב</li>
       <li>Supabase — מסד נתונים + התחברות</li>
       <li>Railway — פריסה</li>
