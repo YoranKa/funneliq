@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FunnelIQ</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 640px;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
+      color: #1a1a1a;
+      background: #fafafa;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #eee; background: #16161a; }
+      input { background: #222; color: #eee; border-color: #444; }
+    }
+    h1 { font-size: 1.4rem; }
+    form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 320px; }
+    input {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.6rem 0.75rem;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    button.secondary { background: transparent; color: #2563eb; border: 1px solid #2563eb; }
+    #error { color: #dc2626; font-size: 0.9rem; min-height: 1.2em; }
+    #dashboard dl { display: grid; grid-template-columns: auto auto; gap: 0.4rem 1.5rem; }
+    #dashboard dt { color: #666; }
+    #dashboard dd { margin: 0; font-weight: 600; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <h1>FunnelIQ</h1>
+
+  <section id="login-view">
+    <p>Sign in with your Northbound account.</p>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="Email" required autocomplete="email" />
+      <input type="password" id="password" placeholder="Password" required autocomplete="current-password" />
+      <button type="submit" id="login-submit">Sign in</button>
+      <p id="error"></p>
+    </form>
+  </section>
+
+  <section id="dashboard-view" hidden>
+    <p>Signed in as <strong id="user-email"></strong>. <button class="secondary" id="signout">Sign out</button></p>
+    <div id="dashboard">Loading funnel data...</div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

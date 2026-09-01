@@ -89,6 +89,23 @@ running locally are the ones reproducible from `requirements.txt` on the server.
 
 To use the environment in Jupyter, select the **Python (funneliq)** kernel.
 
+### Running the app
+
+Copy `.env.example` to `.env` and fill in your Supabase project's URL, anon key,
+and (for `db/load_data.py` only) service-role key. Then, with the schema applied
+(`supabase db query --linked -f db/schema.sql`, or paste it into the Supabase SQL
+Editor) and the data loaded:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+Open http://127.0.0.1:8000 and sign in with a user created under
+**Authentication → Users** in the Supabase dashboard. The login screen runs
+entirely client-side against Supabase Auth; the API never sees a password, only
+the session token it forwards to PostgREST so Row Level Security decides what
+the signed-in user can read.
+
 ---
 
 ## Built with
@@ -102,8 +119,8 @@ Python 3.11 · pandas · scikit-learn · XGBoost · LightGBM · CatBoost · Fast
 - [x] Project structure, git repository, pinned environment
 - [x] Data exploration and cleaning
 - [ ] Deployed skeleton app (Railway)
-- [ ] Supabase database + data loading script
-- [ ] Supabase Auth login
+- [x] Supabase database + data loading script
+- [x] Supabase Auth login
 - [x] Customer-lifetime model
 - [x] Upsell model
 - [x] Super-customer score
