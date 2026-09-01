@@ -242,6 +242,20 @@
       <p class="headline"><code>calls_to_closed</code> (כמה שיחות נדרשו לסגירה) מוביל גם כאן (26-44% מהחשיבות) — בדיוק כמו בחבילה 2 עבור <code>ltv_months</code>. פחות שיחות לסגירה חוזה גם ערך-לקוח ארוך-טווח <b>וגם</b> סיכוי גבוה יותר לשדרוג. דפוס עקבי, לא רעש חד-פעמי.</p>
     </div>
 
+    <div class="card">
+      <h3>מודל מול כלל עסקי פשוט</h3>
+      <p class="headline">דוגמת הבריף עצמה ("if LTV &gt; X and CAC &lt; Y") היא <b>leakage</b> עבור המטרה הזו — <code>ltv_months</code> מוחרג. במקום זה: <code>calls_to_closed ≤ 3</code> וגם <code>customer_acquisition_cost ≤ 1250</code>.</p>
+      <table>
+        <thead><tr><th>מדד</th><th class="num">כלל עסקי</th><th class="num">CatBoost</th></tr></thead>
+        <tbody>
+          <tr><td>Precision</td><td class="num hi">72.0%</td><td class="num">69.8%</td></tr>
+          <tr><td>Recall</td><td class="num">69.0%</td><td class="num hi">83.2%</td></tr>
+          <tr><td>F1</td><td class="num">70.5%</td><td class="num hi">75.9%</td></tr>
+        </tbody>
+      </table>
+      <p class="headline">הכלל מנצח ב-precision — מי שהוא מסמן באמת סביר שישדרג — אבל מפסיד ב-recall, מפספס כשליש מהזדמנויות upsell אמיתיות. שימושי כפילטר זול, אבל המודל שווה פריסה כשהמטרה למקסם הכנסה כוללת.</p>
+    </div>
+
     <div class="principles">
       <span class="principle"><b>07</b> leakage תלוי ב-target — לבדוק מחדש בכל חבילה</span>
       <span class="principle"><b>08</b> חשיבות feature קיצונית יכולה לחשוף הגדרת-בעיה שגויה, לא רק leakage</span>
