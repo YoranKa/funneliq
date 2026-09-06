@@ -56,6 +56,13 @@ data/exports/
 catboost_info/
 
 # ---------------------------------------------------------------
+# Supabase CLI local state
+# `supabase link` writes cached project/pooler info here - machine-local,
+# not project config.
+# ---------------------------------------------------------------
+supabase/.temp/
+
+# ---------------------------------------------------------------
 # OS / editor noise
 # ---------------------------------------------------------------
 .DS_Store
