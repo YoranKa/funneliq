@@ -6,6 +6,9 @@ funnel data into models and recommendations a non-technical team can actually us
 > **Status: in progress.** This README describes what exists today, not what is planned.
 > Sections are added as each part is built and verified.
 
+**Live app:** https://funneliq-production-1366.up.railway.app (login + a live Supabase-backed
+funnel summary today; the model-backed predictions/endpoints are still being added).
+
 ---
 
 ## The problem
@@ -118,7 +121,7 @@ Python 3.11 · pandas · scikit-learn · XGBoost · LightGBM · CatBoost · Fast
 
 - [x] Project structure, git repository, pinned environment
 - [x] Data exploration and cleaning
-- [ ] Deployed skeleton app (Railway)
+- [x] Deployed skeleton app (Railway)
 - [x] Supabase database + data loading script
 - [x] Supabase Auth login
 - [x] Customer-lifetime model
