@@ -345,9 +345,9 @@
     </div>
 
     <div class="principles">
-      <span class="principle"><b>13</b> נשירה לא חייבת להיות מונוטונית — לבדוק כל שלב בנפרד, לא להניח מגמה</span>
-      <span class="principle"><b>14</b> התפלגות דו-שיאית מתחת לממוצע/מדיאן יכולה להסתיר שתי אוכלוסיות שונות לגמרי</span>
-      <span class="principle"><b>15</b> "0" בעמודת ממוצע יכול להיות placeholder לא-מוגדר, לא ערך אמיתי — לבדוק לפני שסומכים</span>
+      <span class="principle"><b>14</b> נשירה לא חייבת להיות מונוטונית — לבדוק כל שלב בנפרד, לא להניח מגמה</span>
+      <span class="principle"><b>15</b> התפלגות דו-שיאית מתחת לממוצע/מדיאן יכולה להסתיר שתי אוכלוסיות שונות לגמרי</span>
+      <span class="principle"><b>16</b> "0" בעמודת ממוצע יכול להיות placeholder לא-מוגדר, לא ערך אמיתי — לבדוק לפני שסומכים</span>
     </div>
   </section>
 
@@ -395,12 +395,14 @@
         </tbody>
       </table>
       <p class="headline">בדקנו כל תוצאה גם מול ממוצע היסטורי גולמי (בלי מודל בכלל). 25×₪2k, 10×₪5k ו-2×₪20k+₪10k תואמים בטווח ~15%. אבל <b>100×₪500 התברר כמנופח פי 3</b> (₪394k מודל מול ₪121k בנתונים גולמיים) — ה"פרופיל הטיפוסי" ל-bucket הזה נשען על קמפיינים שמוציאים עד ₪999 בפועל, ויוצר קומבינציה לא ריאלית כשכופים תקציב מדויק של ₪500. <b>המלצה ל-Northbound:</b> לפרק את ₪50,000 ל-~10–25 קמפיינים של ₪2,000–5,000, לא הפיזור השווה הנוכחי.</p>
+      <p><small>🟢 חי באפליקציה: <code>POST /api/simulate/budget-allocation</code> — 4 כפתורי אסטרטגיה + סימולטור חופשי, כולל האזהרה על תקציבים נמוכים.</small></p>
     </div>
 
     <div class="principles">
-      <span class="principle"><b>16</b> לפעמים המודל הטוב ביותר משתנה — לא תמיד אותו ניצחון קבוע</span>
-      <span class="principle"><b>17</b> "ממוצע לפי bucket" יכול ליצור קומבינציית פיצ'רים לא-ריאלית בקצוות הטווח</span>
-      <span class="principle"><b>18</b> תמיד לאמת תחזית מודל מול ממוצע גולמי פשוט — חוסר הסכמה הוא איתות אמיתי</span>
+      <span class="principle"><b>17</b> לפעמים המודל הטוב ביותר משתנה — לא תמיד אותו ניצחון קבוע</span>
+      <span class="principle"><b>18</b> "ממוצע לפי bucket" יכול ליצור קומבינציית פיצ'רים לא-ריאלית בקצוות הטווח</span>
+      <span class="principle"><b>19</b> תמיד לאמת תחזית מודל מול ממוצע גולמי פשוט — חוסר הסכמה הוא איתות אמיתי</span>
+      <span class="principle"><b>20</b> תמונת Docker "slim" חסרה ספריות מערכת ש-native libraries (lightgbm) צריכות — <code>libgomp.so.1</code> קרס ב-production, לא נתפס מקומית כי הריצה המקומית לא עברה דרך אותה תמונה</span>
     </div>
   </section>
 
@@ -418,8 +420,8 @@
     </div>
 
     <div class="principles">
-      <span class="principle"><b>19</b> builder אוטומטי לא תמיד מזהה נכון — Dockerfile מפורש חוסך ניחושים</span>
-      <span class="principle"><b>20</b> חיבור GitHub↔Railway דורש גם הרשאת GitHub App וגם deployment trigger — לא מספיק להגדיר repo/branch</span>
+      <span class="principle"><b>21</b> builder אוטומטי לא תמיד מזהה נכון — Dockerfile מפורש חוסך ניחושים</span>
+      <span class="principle"><b>22</b> חיבור GitHub↔Railway דורש גם הרשאת GitHub App וגם deployment trigger — לא מספיק להגדיר repo/branch</span>
     </div>
   </section>
 
@@ -434,8 +436,8 @@
       <li class="done">חבילה 6 — אופטימיזציית תקציב</li>
       <li class="done">Supabase — מסד נתונים + התחברות</li>
       <li class="done">Railway — פריסה + חיבור אוטומטי ל-GitHub</li>
+      <li class="done">חשיפת כל 6 החבילות כ-endpoints באפליקציה החיה</li>
       <li>GitHub Actions — CI</li>
-      <li>חשיפת חבילה 6 כ-endpoint באפליקציה החיה (1–5 כבר חיות)</li>
     </ul>
   </section>
 
