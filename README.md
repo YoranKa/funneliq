@@ -7,7 +7,8 @@ funnel data into models and recommendations a non-technical team can actually us
 > Sections are added as each part is built and verified.
 
 **Live app:** https://funneliq-production-1366.up.railway.app (login + a live Supabase-backed
-funnel summary today; the model-backed predictions/endpoints are still being added).
+funnel summary today; the model-backed predictions/endpoints are still being added). Railway
+is connected to this repo's `main` branch, so every push here redeploys automatically.
 
 ---
 
