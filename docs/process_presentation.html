@@ -283,6 +283,7 @@
         </tbody>
       </table>
       <p class="headline">בסף ברירת המחדל 0.5 המודל לא חוצה אף פעם (precision/recall/F1 = 0) — ותקין: אופטימיזציה ל-ROC-AUC מייצרת <b>דירוג</b> טוב, לא סיווג בינארי, וזה בדיוק המוצר שהתבקשנו לבנות (ציון 0-100, לא כן/לא).</p>
+      <p><small>🟢 חי באפליקציה: <code>POST /api/predict/super-customer-score</code> — משתמש בהיפר-פרמטרים המכוונים כערכים קבועים (לא מריץ את החיפוש מחדש בכל deploy).</small></p>
     </div>
 
     <div class="card">
@@ -299,6 +300,7 @@
       <span class="principle"><b>10</b> חיפוש היפר-פרמטרים ממטב את המדד שבחרת — לא בהכרח את הסף שתשתמשו בו בפועל</span>
       <span class="principle"><b>11</b> פיצ'ר מהונדס יכול להיות מיותר לגמרי אם המקור הרציף כבר בפנים</span>
       <span class="principle"><b>12</b> "פחות מאמץ נדרש מהלקוח" חוזר כסיגנל עקבי לאורך שלוש חבילות שונות</span>
+      <span class="principle"><b>13</b> אימון מול הדאטה האמיתי ב-Supabase תפס bug שהנוטבוק (על ה-CSV הגולמי) לא חשף: <code>referred</code> הוא boolean אמיתי ב-DB, לא המחרוזת "Yes" — target עם ערך יחיד, CatBoost קרס מיד</span>
     </div>
   </section>
 
@@ -432,7 +434,7 @@
       <li class="done">Supabase — מסד נתונים + התחברות</li>
       <li class="done">Railway — פריסה + חיבור אוטומטי ל-GitHub</li>
       <li>GitHub Actions — CI</li>
-      <li>חשיפת חבילות 4–6 כ-endpoints באפליקציה החיה (1–3 כבר חיות)</li>
+      <li>חשיפת חבילות 5–6 כ-endpoints באפליקציה החיה (1–4 כבר חיות)</li>
     </ul>
   </section>
 
