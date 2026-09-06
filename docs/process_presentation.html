@@ -407,7 +407,7 @@
   </section>
 
   <section id="infra">
-    <div class="section-head"><span class="section-num">·</span><h2>תשתית — Supabase + Railway</h2></div>
+    <div class="section-head"><span class="section-num">·</span><h2>תשתית — Supabase + Railway + CI</h2></div>
 
     <div class="card">
       <h3>Supabase: DB + Auth + RLS</h3>
@@ -419,9 +419,16 @@
       <p class="headline">האפליקציה (FastAPI) פרוסה דרך <b>Dockerfile</b> מפורש (לא זיהוי אוטומטי — הקוד יושב תחת <code>app/</code>, לא בשורש הריפו). Railway מחובר ל-GitHub עם deployment trigger פעיל: כל <code>push</code> ל-<code>main</code> מפעיל build+deploy אוטומטי, בלי לגעת ב-CLI.</p>
     </div>
 
+    <div class="card">
+      <h3>GitHub Actions: lint + test בכל push</h3>
+      <p class="headline">שוער אוטומטי לפני שכל push מגיע ל-<code>main</code>: <code>ruff</code> (לינטר, על <code>app/</code>/<code>tests/</code>/<code>db/</code> — לא על הנוטבוקים, שהם ניתוח חוקר ולא קוד production) ואז <code>pytest</code> (7 טסטים: health/config, ודחיית 401 על כל endpoint שדורש התחברות). הטסטים משתמשים במפתחות Supabase מזויפים ולא מריצים את ה-<code>lifespan</code> האמיתי (שהיה מאמן 4 מודלים מול Supabase אמיתי) — אז ה-CI לא צריך שום secret.</p>
+      <p><small>🟢 חי: <a href="https://github.com/YoranKa/funneliq/actions" target="_blank" rel="noopener">GitHub Actions</a> — ✅ ירוק על כל push.</small></p>
+    </div>
+
     <div class="principles">
       <span class="principle"><b>21</b> builder אוטומטי לא תמיד מזהה נכון — Dockerfile מפורש חוסך ניחושים</span>
       <span class="principle"><b>22</b> חיבור GitHub↔Railway דורש גם הרשאת GitHub App וגם deployment trigger — לא מספיק להגדיר repo/branch</span>
+      <span class="principle"><b>23</b> <code>pytest</code> לבד לא מוסיף את תיקיית העבודה ל-<code>sys.path</code> כמו <code>python -m pytest</code> — עבר מקומית, נכשל ב-runner האמיתי; בדיוק סוג הפער ש-CI קיים כדי לתפוס</span>
     </div>
   </section>
 
@@ -437,7 +444,7 @@
       <li class="done">Supabase — מסד נתונים + התחברות</li>
       <li class="done">Railway — פריסה + חיבור אוטומטי ל-GitHub</li>
       <li class="done">חשיפת כל 6 החבילות כ-endpoints באפליקציה החיה</li>
-      <li>GitHub Actions — CI</li>
+      <li class="done">GitHub Actions — CI</li>
     </ul>
   </section>
 
