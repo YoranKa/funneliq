@@ -16,7 +16,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import pandas as pd
-from catboost import CatBoostRegressor
+from catboost import CatBoostClassifier, CatBoostRegressor
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -41,7 +41,13 @@ LTV_FEATURES = [
     "customer_acquisition_cost", "purchased",
 ]
 
+# notebooks/03_upsell_classification.ipynb's refined model: trained on
+# purchasers only (upsell is meaningless before a purchase happens), so
+# "purchased" is dropped - it would be constant (always 1) and uninformative.
+UPSELL_FEATURES = [f for f in LTV_FEATURES if f != "purchased"]
+
 _ltv_model: CatBoostRegressor | None = None
+_upsell_model: CatBoostClassifier | None = None
 
 
 def _train_ltv_model() -> CatBoostRegressor:
@@ -56,10 +62,23 @@ def _train_ltv_model() -> CatBoostRegressor:
     return model
 
 
+def _train_upsell_model() -> CatBoostClassifier:
+    admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    rows = _fetch_all_rows(
+        admin_client, ",".join(UPSELL_FEATURES + ["upsell"]), purchased_only=True
+    )
+    df = pd.DataFrame(rows)
+
+    model = CatBoostClassifier(random_state=42, verbose=False)
+    model.fit(df[UPSELL_FEATURES], df["upsell"])
+    return model
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _ltv_model
+    global _ltv_model, _upsell_model
     _ltv_model = _train_ltv_model()
+    _upsell_model = _train_upsell_model()
     yield
 
 
@@ -84,19 +103,31 @@ def _client_for_user(access_token: str):
     return client
 
 
-def _fetch_all_rows(client, columns: str, page_size: int = 1000) -> list[dict]:
+def _require_session(authorization: str | None):
+    """Validate the bearer token the same way every endpoint does, and
+    return a Supabase client scoped to that user's session."""
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Missing bearer token")
+    token = authorization.split(" ", 1)[1]
+
+    client = _client_for_user(token)
+    try:
+        client.table("funnel_records").select("id").limit(1).execute()
+    except APIError as exc:
+        raise HTTPException(status_code=401, detail="Invalid or expired session") from exc
+    return client
+
+
+def _fetch_all_rows(client, columns: str, page_size: int = 1000, purchased_only: bool = False) -> list[dict]:
     # PostgREST caps rows per request (1000 by default), so a full-table
     # read needs paging via .range() rather than one .select().execute().
     rows: list[dict] = []
     start = 0
     while True:
-        batch = (
-            client.table("funnel_records")
-            .select(columns)
-            .range(start, start + page_size - 1)
-            .execute()
-            .data
-        )
+        query = client.table("funnel_records").select(columns)
+        if purchased_only:
+            query = query.eq("purchased", True)
+        batch = query.range(start, start + page_size - 1).execute().data
         rows.extend(batch)
         if len(batch) < page_size:
             return rows
@@ -188,22 +219,47 @@ class LtvPredictionRequest(BaseModel):
 
 @app.post("/api/predict/ltv")
 def predict_ltv(payload: LtvPredictionRequest, authorization: str | None = Header(default=None)):
-    if not authorization or not authorization.lower().startswith("bearer "):
-        raise HTTPException(status_code=401, detail="Missing bearer token")
-    token = authorization.split(" ", 1)[1]
-
     # This endpoint doesn't read any RLS-scoped rows itself (the model
-    # already lives in memory), but it still checks for a real, valid
-    # session the same way every other endpoint does.
-    client = _client_for_user(token)
-    try:
-        client.table("funnel_records").select("id").limit(1).execute()
-    except APIError as exc:
-        raise HTTPException(status_code=401, detail="Invalid or expired session") from exc
+    # already lives in memory), but it still requires a real, valid session.
+    _require_session(authorization)
 
     row = pd.DataFrame([payload.model_dump()])[LTV_FEATURES]
     predicted_months = float(_ltv_model.predict(row)[0])
     return {"predicted_ltv_months": round(predicted_months, 1)}
+
+
+class UpsellPredictionRequest(BaseModel):
+    ad_budget: float
+    num_leads: float
+    leads_answered: float
+    leads_not_answered: float
+    followup_1: float
+    followup_2: float
+    followup_3: float
+    followup_4: float
+    followup_5: float
+    not_closed: float
+    closed: float
+    calls_to_closed: float
+    calls_to_not_closed: float
+    customer_acquisition_cost: float
+
+
+@app.post("/api/predict/upsell")
+def predict_upsell(payload: UpsellPredictionRequest, authorization: str | None = Header(default=None)):
+    _require_session(authorization)
+
+    row = pd.DataFrame([payload.model_dump()])[UPSELL_FEATURES]
+    # Business takeaway from notebooks/03_upsell_classification.ipynb: ship
+    # the probability, not a hard 0/1 label, so the sales team can rank
+    # purchasers rather than only calling whoever crosses a 0.5 cutoff.
+    probability = float(_upsell_model.predict_proba(row)[0][1])
+
+    # Same simple business rule from the notebook, returned alongside the
+    # model so the two can be compared directly on the same customer.
+    rule_flag = bool(payload.calls_to_closed <= 3 and payload.customer_acquisition_cost <= 1250)
+
+    return {"upsell_probability": round(probability, 4), "business_rule_flag": rule_flag}
 
 
 app.mount("/", StaticFiles(directory=ROOT / "app" / "static", html=True), name="static")
