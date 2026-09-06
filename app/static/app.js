@@ -6,9 +6,18 @@ const errorEl = document.getElementById("error");
 const userEmailEl = document.getElementById("user-email");
 const dashboardEl = document.getElementById("dashboard");
 const tierPanelEl = document.getElementById("tier-panel");
-const ltvForm = document.getElementById("ltv-form");
+const profileForm = document.getElementById("profile-form");
 const ltvResultEl = document.getElementById("ltv-result");
+const upsellResultEl = document.getElementById("upsell-result");
 let currentAccessToken = null;
+
+function readProfileForm() {
+  const payload = {};
+  for (const input of profileForm.querySelectorAll("[data-key]")) {
+    payload[input.dataset.key] = input.type === "checkbox" ? input.checked : Number(input.value);
+  }
+  return payload;
+}
 
 let supabaseClient;
 
@@ -87,15 +96,8 @@ async function loadConversionByTier(accessToken) {
   }
 }
 
-ltvForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+document.getElementById("ltv-submit").addEventListener("click", async () => {
   ltvResultEl.textContent = "Predicting...";
-
-  const payload = {};
-  for (const input of ltvForm.querySelectorAll("[data-key]")) {
-    payload[input.dataset.key] = input.type === "checkbox" ? input.checked : Number(input.value);
-  }
-
   try {
     const res = await fetch("/api/predict/ltv", {
       method: "POST",
@@ -103,13 +105,35 @@ ltvForm.addEventListener("submit", async (event) => {
         Authorization: `Bearer ${currentAccessToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(readProfileForm()),
     });
     if (!res.ok) throw new Error(`Request failed (${res.status})`);
     const { predicted_ltv_months } = await res.json();
     ltvResultEl.textContent = `Predicted lifetime: ${predicted_ltv_months} months`;
   } catch (err) {
     ltvResultEl.textContent = `Could not get a prediction: ${err.message}`;
+  }
+});
+
+document.getElementById("upsell-submit").addEventListener("click", async () => {
+  upsellResultEl.textContent = "Predicting...";
+  try {
+    const { purchased, ...upsellPayload } = readProfileForm();
+    const res = await fetch("/api/predict/upsell", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(upsellPayload),
+    });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const { upsell_probability, business_rule_flag } = await res.json();
+    upsellResultEl.textContent =
+      `Upsell probability: ${(upsell_probability * 100).toFixed(1)}% ` +
+      `(business rule: ${business_rule_flag ? "flag for outreach" : "no flag"})`;
+  } catch (err) {
+    upsellResultEl.textContent = `Could not get a prediction: ${err.message}`;
   }
 });
 
