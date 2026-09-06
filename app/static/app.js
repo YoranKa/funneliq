@@ -6,6 +6,9 @@ const errorEl = document.getElementById("error");
 const userEmailEl = document.getElementById("user-email");
 const dashboardEl = document.getElementById("dashboard");
 const tierPanelEl = document.getElementById("tier-panel");
+const ltvForm = document.getElementById("ltv-form");
+const ltvResultEl = document.getElementById("ltv-result");
+let currentAccessToken = null;
 
 let supabaseClient;
 
@@ -27,6 +30,7 @@ function render(session) {
     loginView.hidden = true;
     dashboardView.hidden = false;
     userEmailEl.textContent = session.user.email;
+    currentAccessToken = session.access_token;
     loadDashboard(session.access_token);
     loadConversionByTier(session.access_token);
   } else {
@@ -82,6 +86,32 @@ async function loadConversionByTier(accessToken) {
     tierPanelEl.textContent = `Could not load tier analysis: ${err.message}`;
   }
 }
+
+ltvForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  ltvResultEl.textContent = "Predicting...";
+
+  const payload = {};
+  for (const input of ltvForm.querySelectorAll("[data-key]")) {
+    payload[input.dataset.key] = input.type === "checkbox" ? input.checked : Number(input.value);
+  }
+
+  try {
+    const res = await fetch("/api/predict/ltv", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const { predicted_ltv_months } = await res.json();
+    ltvResultEl.textContent = `Predicted lifetime: ${predicted_ltv_months} months`;
+  } catch (err) {
+    ltvResultEl.textContent = `Could not get a prediction: ${err.message}`;
+  }
+});
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();

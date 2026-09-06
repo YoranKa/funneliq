@@ -44,6 +44,12 @@
     table { border-collapse: collapse; margin-top: 0.5rem; }
     th, td { text-align: left; padding: 0.35rem 1rem 0.35rem 0; border-bottom: 1px solid #ddd; }
     @media (prefers-color-scheme: dark) { th, td { border-color: #444; } }
+    #ltv-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-width: 100%; }
+    #ltv-form label { display: flex; flex-direction: column; font-size: 0.8rem; color: #666; gap: 0.2rem; }
+    #ltv-form input { padding: 0.4rem; font-size: 0.9rem; }
+    #ltv-form .checkbox { flex-direction: row; align-items: center; }
+    #ltv-form button { grid-column: 1 / -1; width: fit-content; }
+    #ltv-result { margin-top: 0.75rem; font-size: 1.1rem; }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -66,6 +72,28 @@
 
     <h2>Package 1 &mdash; conversion rate by budget tier</h2>
     <div id="tier-panel">Loading budget-tier analysis...</div>
+
+    <h2>Package 2 &mdash; predict customer lifetime (LTV)</h2>
+    <p><small>CatBoost, trained live on Supabase data at startup. Prefilled with dataset averages &mdash; edit any field and predict.</small></p>
+    <form id="ltv-form">
+      <label>Ad budget (&#8362;) <input type="number" data-key="ad_budget" value="4655" step="1" required /></label>
+      <label>Leads <input type="number" data-key="num_leads" value="46" step="1" required /></label>
+      <label>Leads answered <input type="number" data-key="leads_answered" value="28" step="1" required /></label>
+      <label>Leads not answered <input type="number" data-key="leads_not_answered" value="18" step="1" required /></label>
+      <label>Follow-up 1 <input type="number" data-key="followup_1" value="22" step="1" required /></label>
+      <label>Follow-up 2 <input type="number" data-key="followup_2" value="16" step="1" required /></label>
+      <label>Follow-up 3 <input type="number" data-key="followup_3" value="13" step="1" required /></label>
+      <label>Follow-up 4 <input type="number" data-key="followup_4" value="12" step="1" required /></label>
+      <label>Follow-up 5 <input type="number" data-key="followup_5" value="8" step="1" required /></label>
+      <label>Not closed <input type="number" data-key="not_closed" value="5" step="1" required /></label>
+      <label>Closed <input type="number" data-key="closed" value="3" step="1" required /></label>
+      <label>Calls to closed <input type="number" data-key="calls_to_closed" value="3.5" step="0.1" required /></label>
+      <label>Calls to not-closed <input type="number" data-key="calls_to_not_closed" value="3.9" step="0.1" required /></label>
+      <label>Acquisition cost (&#8362;) <input type="number" data-key="customer_acquisition_cost" value="1369" step="1" required /></label>
+      <label class="checkbox"><input type="checkbox" data-key="purchased" checked /> Purchased</label>
+      <button type="submit" id="ltv-submit">Predict LTV</button>
+    </form>
+    <div id="ltv-result"></div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
