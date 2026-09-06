@@ -41,6 +41,9 @@
     #dashboard dl { display: grid; grid-template-columns: auto auto; gap: 0.4rem 1.5rem; }
     #dashboard dt { color: #666; }
     #dashboard dd { margin: 0; font-weight: 600; }
+    table { border-collapse: collapse; margin-top: 0.5rem; }
+    th, td { text-align: left; padding: 0.35rem 1rem 0.35rem 0; border-bottom: 1px solid #ddd; }
+    @media (prefers-color-scheme: dark) { th, td { border-color: #444; } }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -60,6 +63,9 @@
   <section id="dashboard-view" hidden>
     <p>Signed in as <strong id="user-email"></strong>. <button class="secondary" id="signout">Sign out</button></p>
     <div id="dashboard">Loading funnel data...</div>
+
+    <h2>Package 1 &mdash; conversion rate by budget tier</h2>
+    <div id="tier-panel">Loading budget-tier analysis...</div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>

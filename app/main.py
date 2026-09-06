@@ -14,6 +14,7 @@ user-facing request.
 import os
 from pathlib import Path
 
+import pandas as pd
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -47,6 +48,25 @@ def _client_for_user(access_token: str):
     return client
 
 
+def _fetch_all_rows(client, columns: str, page_size: int = 1000) -> list[dict]:
+    # PostgREST caps rows per request (1000 by default), so a full-table
+    # read needs paging via .range() rather than one .select().execute().
+    rows: list[dict] = []
+    start = 0
+    while True:
+        batch = (
+            client.table("funnel_records")
+            .select(columns)
+            .range(start, start + page_size - 1)
+            .execute()
+            .data
+        )
+        rows.extend(batch)
+        if len(batch) < page_size:
+            return rows
+        start += page_size
+
+
 @app.get("/api/funnel-summary")
 def funnel_summary(authorization: str | None = Header(default=None)):
     if not authorization or not authorization.lower().startswith("bearer "):
@@ -77,6 +97,38 @@ def funnel_summary(authorization: str | None = Header(default=None)):
         "avg_ltv_months": round(avg_ltv, 2),
         "upsell_rate": round(upsell_rate, 3),
         "referred_rate": round(referred_rate, 3),
+    }
+
+
+@app.get("/api/insights/conversion-by-budget-tier")
+def conversion_by_budget_tier(authorization: str | None = Header(default=None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Missing bearer token")
+    token = authorization.split(" ", 1)[1]
+
+    client = _client_for_user(token)
+    try:
+        rows = _fetch_all_rows(client, "ad_budget,num_leads,closed")
+    except APIError as exc:
+        raise HTTPException(status_code=401, detail="Invalid or expired session") from exc
+
+    # Same bins/labels and mean-of-per-row-ratios as notebooks/01_explore.ipynb -
+    # see docs/package_1_findings.md for why the 1500-2000 gap gets its own bucket.
+    df = pd.DataFrame(rows)
+    tier = pd.cut(
+        df["ad_budget"],
+        bins=[0, 1500, 2000, 5000, float("inf")],
+        labels=["Low (<=1500)", "Unclassified (1500-2000)", "Mid (2000-5000)", "High (>5000)"],
+    )
+    conversion_rate = df["closed"] / df["num_leads"]
+    by_tier = conversion_rate.groupby(tier, observed=True).mean().sort_index()
+
+    return {
+        "row_count": len(df),
+        "tiers": [
+            {"label": label, "conversion_rate": round(float(rate), 4)}
+            for label, rate in by_tier.items()
+        ],
     }
 
 
