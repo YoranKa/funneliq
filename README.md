@@ -3,13 +3,19 @@
 Marketing-funnel intelligence for **Northbound Media** — turning two years of raw
 funnel data into models and recommendations a non-technical team can actually use.
 
-> **Status: in progress.** This README describes what exists today, not what is planned.
-> Sections are added as each part is built and verified.
+> **Status: complete.** All 6 analytical packages are trained live and exposed as
+> endpoints in the deployed app, behind real Supabase Auth + RLS, on Railway with
+> CI gating every push. See [REPORT.md](REPORT.md) for the findings and business
+> recommendations.
 
-**Live app:** https://funneliq-production-1366.up.railway.app (login + a live Supabase-backed
-funnel summary today; the model-backed predictions/endpoints are still being added). Railway's
-GitHub App is authorized on this repo, connected to `main`, and has an active deployment
-trigger, so every push here redeploys automatically.
+**Live app:** https://funneliq-production-1366.up.railway.app — sign in and try
+live LTV/upsell/super-customer predictions and the budget allocation simulator,
+all computed against Supabase at request time. Railway's GitHub App is
+authorized on this repo, connected to `main`, and has an active deployment
+trigger, so every push here redeploys automatically. GitHub Actions runs lint +
+tests on every push too — see the badge below.
+
+[![CI](https://github.com/YoranKa/funneliq/actions/workflows/ci.yml/badge.svg)](https://github.com/YoranKa/funneliq/actions/workflows/ci.yml)
 
 ---
 
@@ -62,7 +68,11 @@ funneliq/
 ├── data/                  raw dataset
 ├── notebooks/             exploration and model development (messy on purpose)
 ├── app/                   production application code (clean, deployable)
+├── db/                    Supabase schema + one-time data loading script
+├── tests/                 pytest suite run by GitHub Actions on every push
+├── .github/workflows/     CI: lint (ruff) + test (pytest)
 ├── docs/                  the project brief and written findings
+├── REPORT.md              findings and business recommendations, package by package
 ├── requirements.txt       runtime dependencies (what the server installs)
 └── requirements-dev.txt   development dependencies (notebooks, plots, tests)
 ```
@@ -123,12 +133,13 @@ Python 3.11 · pandas · scikit-learn · XGBoost · LightGBM · CatBoost · Fast
 
 - [x] Project structure, git repository, pinned environment
 - [x] Data exploration and cleaning
-- [x] Deployed skeleton app (Railway)
+- [x] Deployed app (Railway, auto-deploy from GitHub)
 - [x] Supabase database + data loading script
-- [x] Supabase Auth login
-- [x] Customer-lifetime model
-- [x] Upsell model
-- [x] Super-customer score
-- [x] Follow-up analysis
-- [x] Budget optimizer
-- [ ] CI workflow
+- [x] Supabase Auth login + RLS
+- [x] Customer-lifetime model — exposed as `POST /api/predict/ltv`
+- [x] Upsell model — exposed as `POST /api/predict/upsell`
+- [x] Super-customer score — exposed as `POST /api/predict/super-customer-score`
+- [x] Follow-up analysis — exposed as `GET /api/insights/followup-dropout`
+- [x] Budget optimizer — exposed as `POST /api/simulate/budget-allocation`
+- [x] CI workflow (GitHub Actions: lint + test on every push)
+- [x] Findings write-up ([REPORT.md](REPORT.md))
