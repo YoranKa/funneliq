@@ -18,6 +18,7 @@ from pathlib import Path
 import pandas as pd
 from catboost import CatBoostClassifier, CatBoostRegressor
 from dotenv import load_dotenv
+from lightgbm import LGBMRegressor
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
 from postgrest.exceptions import APIError
@@ -61,6 +62,8 @@ _ltv_model: CatBoostRegressor | None = None
 _upsell_model: CatBoostClassifier | None = None
 _super_customer_model: CatBoostClassifier | None = None
 _budget_tier_edges: list[float] | None = None
+_budget_profit_model: LGBMRegressor | None = None
+_budget_profile: pd.DataFrame | None = None
 
 
 def _train_ltv_model() -> CatBoostRegressor:
@@ -120,12 +123,34 @@ def _train_super_customer_model() -> tuple[CatBoostClassifier, list[float]]:
     return model, edges
 
 
+def _train_budget_profit_model() -> tuple[LGBMRegressor, pd.DataFrame]:
+    # Full historical features (same list as LTV_FEATURES) - unlike Packages
+    # 2-4, the simulator only ever knows a hypothetical campaign's budget, so
+    # training isn't restricted to early-funnel-only signals. See
+    # notebooks/06_budget_optimization.ipynb for why LightGBM was the winner.
+    admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    rows = _fetch_all_rows(admin_client, ",".join(LTV_FEATURES + ["cumulative_profit"]))
+    df = pd.DataFrame(rows).dropna(subset=["cumulative_profit"])
+
+    model = LGBMRegressor(random_state=42, verbose=-1)
+    model.fit(df[LTV_FEATURES], df["cumulative_profit"])
+
+    # Typical funnel profile per 500-wide budget bucket (median, since
+    # several features are right-skewed) - the simulator overrides ad_budget
+    # with the real value being tested but fills in everything else from here.
+    df["budget_bucket"] = (df["ad_budget"] // 500 * 500).astype(int)
+    profile = df.groupby("budget_bucket")[LTV_FEATURES].median()
+    return model, profile
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _ltv_model, _upsell_model, _super_customer_model, _budget_tier_edges
+    global _budget_profit_model, _budget_profile
     _ltv_model = _train_ltv_model()
     _upsell_model = _train_upsell_model()
     _super_customer_model, _budget_tier_edges = _train_super_customer_model()
+    _budget_profit_model, _budget_profile = _train_budget_profit_model()
     yield
 
 
@@ -381,6 +406,46 @@ def predict_super_customer_score(
 
     probability = float(_super_customer_model.predict_proba(row[SUPER_CUSTOMER_FEATURES])[0][1])
     return {"super_customer_score": round(probability * 100, 1)}
+
+
+class BudgetAllocationRequest(BaseModel):
+    campaign_budgets: list[float]
+
+
+def _predict_campaign_profit(budget: float) -> float:
+    # Clip to the bucket range actually seen in training data - a budget far
+    # outside data/funnel_marketing_data.csv's 500-20,000 range has no
+    # typical profile to borrow from.
+    bucket = int(budget // 500 * 500)
+    bucket = min(max(bucket, _budget_profile.index.min()), _budget_profile.index.max())
+
+    row = _budget_profile.loc[bucket, LTV_FEATURES].copy()
+    row["ad_budget"] = budget
+    return float(_budget_profit_model.predict(row.to_frame().T)[0])
+
+
+@app.post("/api/simulate/budget-allocation")
+def simulate_budget_allocation(payload: BudgetAllocationRequest, authorization: str | None = Header(default=None)):
+    _require_session(authorization)
+
+    if not payload.campaign_budgets:
+        raise HTTPException(status_code=422, detail="campaign_budgets must not be empty")
+
+    total_spend = sum(payload.campaign_budgets)
+    total_profit = sum(_predict_campaign_profit(b) for b in payload.campaign_budgets)
+
+    # Notebook finding: the "typical profile" approximation breaks down at
+    # the low end (bucket width becomes proportionally huge vs. the target
+    # budget), verified there as a real 3x overprediction at 500 campaigns.
+    low_budget_warning = any(b < 1000 for b in payload.campaign_budgets)
+
+    return {
+        "n_campaigns": len(payload.campaign_budgets),
+        "total_spend": total_spend,
+        "predicted_profit": round(total_profit, 0),
+        "roi": round(total_profit / total_spend, 3),
+        "low_budget_warning": low_budget_warning,
+    }
 
 
 app.mount("/", StaticFiles(directory=ROOT / "app" / "static", html=True), name="static")

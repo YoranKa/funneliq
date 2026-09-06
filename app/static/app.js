@@ -11,6 +11,7 @@ const profileForm = document.getElementById("profile-form");
 const ltvResultEl = document.getElementById("ltv-result");
 const upsellResultEl = document.getElementById("upsell-result");
 const superCustomerResultEl = document.getElementById("super-customer-result");
+const budgetResultEl = document.getElementById("budget-result");
 let currentAccessToken = null;
 
 function readProfileForm() {
@@ -196,6 +197,51 @@ document.getElementById("super-customer-submit").addEventListener("click", async
   } catch (err) {
     superCustomerResultEl.textContent = `Could not get a score: ${err.message}`;
   }
+});
+
+function parseBudgetSpec(spec) {
+  // Either "20000,20000,10000" (explicit list) or "2000x25" (N campaigns of
+  // the same size), matching how the preset buttons and custom form differ.
+  if (spec.includes("x")) {
+    const [amount, count] = spec.split("x").map(Number);
+    return Array(count).fill(amount);
+  }
+  return spec.split(",").map(Number);
+}
+
+async function simulateBudgets(campaignBudgets) {
+  budgetResultEl.textContent = "Simulating...";
+  try {
+    const res = await fetch("/api/simulate/budget-allocation", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ campaign_budgets: campaignBudgets }),
+    });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const { n_campaigns, total_spend, predicted_profit, roi, low_budget_warning } = await res.json();
+
+    budgetResultEl.innerHTML = `
+      <p>${n_campaigns} campaigns, &#8362;${total_spend.toLocaleString()} spent &rarr;
+      predicted profit <b>&#8362;${predicted_profit.toLocaleString()}</b> (ROI ${roi.toFixed(2)}x)</p>
+      ${low_budget_warning ? '<p class="warning"><small>Some campaigns are under &#8362;1,000 - the "typical profile" approximation is known to overpredict there (see Package 6 findings). Treat this number as unreliable.</small></p>' : ""}
+    `;
+  } catch (err) {
+    budgetResultEl.textContent = `Could not run simulation: ${err.message}`;
+  }
+}
+
+for (const button of document.querySelectorAll(".budget-preset")) {
+  button.addEventListener("click", () => simulateBudgets(parseBudgetSpec(button.dataset.budgets)));
+}
+
+document.getElementById("custom-budget-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const n = Number(document.getElementById("custom-n").value);
+  const perCampaign = Number(document.getElementById("custom-budget").value);
+  simulateBudgets(Array(n).fill(perCampaign));
 });
 
 loginForm.addEventListener("submit", async (event) => {

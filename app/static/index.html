@@ -55,6 +55,11 @@
     .bar-fill { background: #2563eb; height: 100%; }
     @media (prefers-color-scheme: dark) { .bar-track { background: #333; } }
     #dropout-recommendation { max-width: 640px; margin-top: 0.5rem; }
+    .budget-preset { margin: 0.25rem 0.5rem 0.5rem 0; }
+    #custom-budget-form { display: flex; gap: 1rem; }
+    #custom-budget-form label { display: flex; flex-direction: column; font-size: 0.8rem; color: #666; gap: 0.2rem; }
+    #budget-result { margin-top: 0.75rem; max-width: 640px; }
+    .warning { color: #c98a00; }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -106,6 +111,21 @@
 
     <h2>Package 5 &mdash; follow-up dropout</h2>
     <div id="dropout-panel">Loading follow-up dropout analysis...</div>
+
+    <h2>Package 6 &mdash; budget allocation simulator</h2>
+    <p><small>LightGBM, trained live on Supabase data at startup. Try the four strategies from the brief, or a custom split of a &#8362;50,000 monthly budget.</small></p>
+    <div>
+      <button type="button" class="secondary budget-preset" data-budgets="20000,20000,10000">2 &times; &#8362;20k + &#8362;10k</button>
+      <button type="button" class="secondary budget-preset" data-budgets="5000x10">10 &times; &#8362;5k</button>
+      <button type="button" class="secondary budget-preset" data-budgets="2000x25">25 &times; &#8362;2k</button>
+      <button type="button" class="secondary budget-preset" data-budgets="500x100">100 &times; &#8362;500</button>
+    </div>
+    <form id="custom-budget-form" style="flex-direction: row; align-items: flex-end; max-width: 100%;">
+      <label>Number of campaigns <input type="number" id="custom-n" value="20" step="1" min="1" /></label>
+      <label>&#8362; per campaign <input type="number" id="custom-budget" value="2500" step="50" min="50" /></label>
+      <button type="submit">Simulate custom split</button>
+    </form>
+    <div id="budget-result"></div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
