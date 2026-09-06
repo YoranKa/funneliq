@@ -246,6 +246,51 @@ def conversion_by_budget_tier(authorization: str | None = Header(default=None)):
     }
 
 
+FOLLOWUP_STAGES = ["leads_answered", "followup_1", "followup_2", "followup_3", "followup_4", "followup_5"]
+
+
+@app.get("/api/insights/followup-dropout")
+def followup_dropout(authorization: str | None = Header(default=None)):
+    # A genuine user-facing read (not model training), so it goes through
+    # the signed-in user's own token like conversion-by-budget-tier does -
+    # RLS decides what's visible, not the service-role key.
+    client = _require_session(authorization)
+    rows = _fetch_all_rows(client, ",".join(FOLLOWUP_STAGES + ["closed", "calls_to_closed", "cumulative_profit"]))
+    df = pd.DataFrame(rows)
+
+    # Dropout per stage, computed per row then averaged (weighs every
+    # campaign equally) - see notebooks/05_followup_dropout.ipynb.
+    stage_dropout = []
+    for i in range(1, len(FOLLOWUP_STAGES)):
+        prev_col, cur_col = FOLLOWUP_STAGES[i - 1], FOLLOWUP_STAGES[i]
+        rate = ((df[prev_col] - df[cur_col]) / df[prev_col]).mean()
+        stage_dropout.append({"stage": f"{prev_col} -> {cur_col}", "dropout_rate": round(float(rate), 4)})
+
+    # closed==0 rows have calls_to_closed==0 as a placeholder (nothing to
+    # average), not a real zero-call close - excluded, same as the notebook.
+    closed_deals = df[df["closed"] > 0].copy()
+    closed_deals["profit_per_deal"] = closed_deals["cumulative_profit"] / closed_deals["closed"]
+    profit_by_calls = (
+        closed_deals.groupby("calls_to_closed")["profit_per_deal"].agg(["mean", "count"]).sort_index()
+    )
+
+    return {
+        "row_count": len(df),
+        "stage_dropout": stage_dropout,
+        "profit_by_calls": [
+            {"calls_to_closed": float(calls), "avg_profit_per_deal": round(float(row["mean"]), 0), "count": int(row["count"])}
+            for calls, row in profit_by_calls.iterrows()
+        ],
+        "recommendation": (
+            "Don't cut off follow-ups after call 3 - dropout isn't monotonic (stage 3->4 is "
+            "the lowest of all five, then 4->5 spikes) and ~21% of closed deals need all 5 "
+            "calls. Profit per deal does fall sharply after call 3, so use the LTV/upsell/"
+            "super-customer scores to prioritize who gets chased past call 3, rather than "
+            "applying the same cutoff to everyone."
+        ),
+    }
+
+
 class LtvPredictionRequest(BaseModel):
     ad_budget: float
     num_leads: float
