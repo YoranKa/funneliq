@@ -46,8 +46,21 @@ LTV_FEATURES = [
 # "purchased" is dropped - it would be constant (always 1) and uninformative.
 UPSELL_FEATURES = [f for f in LTV_FEATURES if f != "purchased"]
 
+# notebooks/04_super_customer_score.ipynb: early-funnel-only features, since
+# the score must be computable before purchase/referral/upsell are known.
+SUPER_CUSTOMER_BASE_FEATURES = [
+    "ad_budget", "num_leads", "leads_answered", "leads_not_answered",
+    "followup_1", "followup_2", "followup_3", "followup_4", "followup_5",
+]
+SUPER_CUSTOMER_FEATURES = SUPER_CUSTOMER_BASE_FEATURES + ["budget_tier"]
+# Winning hyperparameters from the notebook's RandomizedSearchCV (ROC-AUC
+# 0.813) - reused as fixed values here instead of re-tuning on every deploy.
+SUPER_CUSTOMER_BEST_PARAMS = {"learning_rate": 0.01, "iterations": 100, "depth": 3}
+
 _ltv_model: CatBoostRegressor | None = None
 _upsell_model: CatBoostClassifier | None = None
+_super_customer_model: CatBoostClassifier | None = None
+_budget_tier_edges: list[float] | None = None
 
 
 def _train_ltv_model() -> CatBoostRegressor:
@@ -74,11 +87,45 @@ def _train_upsell_model() -> CatBoostClassifier:
     return model
 
 
+def _train_super_customer_model() -> tuple[CatBoostClassifier, list[float]]:
+    admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    columns = SUPER_CUSTOMER_BASE_FEATURES + ["purchased", "referred", "upsell", "ltv_months"]
+    df = pd.DataFrame(_fetch_all_rows(admin_client, ",".join(set(columns))))
+
+    # Engineered label: a purchaser who referred someone, upsold, and stuck
+    # around in the top third of tenure among purchasers. Unlike the
+    # notebook's raw CSV (where referred is "Yes"/"No"), db/load_data.py
+    # already converted it to a real boolean when loading into Supabase.
+    tenure_threshold = df.loc[df["purchased"], "ltv_months"].quantile(2 / 3)
+    super_customer = (
+        df["purchased"]
+        & df["referred"]
+        & df["upsell"]
+        & (df["ltv_months"] >= tenure_threshold)
+    ).astype(int)
+
+    # budget_tier: equal-sized tertiles of ad_budget. The bin edges are kept
+    # (with the outer edges opened to +-inf) so a single new ad_budget value
+    # can be bucketed the same way at prediction time.
+    _, edges = pd.qcut(df["ad_budget"], q=3, retbins=True)
+    edges = [-float("inf")] + list(edges[1:-1]) + [float("inf")]
+    budget_tier = pd.cut(df["ad_budget"], bins=edges, labels=["Low", "Mid", "High"]).astype(str)
+
+    X = df[SUPER_CUSTOMER_BASE_FEATURES].copy()
+    X["budget_tier"] = budget_tier
+    cat_feature_idx = [X.columns.get_loc("budget_tier")]
+
+    model = CatBoostClassifier(random_state=42, verbose=False, **SUPER_CUSTOMER_BEST_PARAMS)
+    model.fit(X, super_customer, cat_features=cat_feature_idx)
+    return model, edges
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _ltv_model, _upsell_model
+    global _ltv_model, _upsell_model, _super_customer_model, _budget_tier_edges
     _ltv_model = _train_ltv_model()
     _upsell_model = _train_upsell_model()
+    _super_customer_model, _budget_tier_edges = _train_super_customer_model()
     yield
 
 
@@ -260,6 +307,35 @@ def predict_upsell(payload: UpsellPredictionRequest, authorization: str | None =
     rule_flag = bool(payload.calls_to_closed <= 3 and payload.customer_acquisition_cost <= 1250)
 
     return {"upsell_probability": round(probability, 4), "business_rule_flag": rule_flag}
+
+
+class SuperCustomerScoreRequest(BaseModel):
+    ad_budget: float
+    num_leads: float
+    leads_answered: float
+    leads_not_answered: float
+    followup_1: float
+    followup_2: float
+    followup_3: float
+    followup_4: float
+    followup_5: float
+
+
+@app.post("/api/predict/super-customer-score")
+def predict_super_customer_score(
+    payload: SuperCustomerScoreRequest, authorization: str | None = Header(default=None)
+):
+    _require_session(authorization)
+
+    row = pd.DataFrame([payload.model_dump()])
+    # Bucket this customer's ad_budget with the same tertile edges the model
+    # was trained on (see notebooks/04_super_customer_score.ipynb).
+    row["budget_tier"] = pd.cut(
+        row["ad_budget"], bins=_budget_tier_edges, labels=["Low", "Mid", "High"]
+    ).astype(str)
+
+    probability = float(_super_customer_model.predict_proba(row[SUPER_CUSTOMER_FEATURES])[0][1])
+    return {"super_customer_score": round(probability * 100, 1)}
 
 
 app.mount("/", StaticFiles(directory=ROOT / "app" / "static", html=True), name="static")

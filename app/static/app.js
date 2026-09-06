@@ -9,6 +9,7 @@ const tierPanelEl = document.getElementById("tier-panel");
 const profileForm = document.getElementById("profile-form");
 const ltvResultEl = document.getElementById("ltv-result");
 const upsellResultEl = document.getElementById("upsell-result");
+const superCustomerResultEl = document.getElementById("super-customer-result");
 let currentAccessToken = null;
 
 function readProfileForm() {
@@ -134,6 +135,25 @@ document.getElementById("upsell-submit").addEventListener("click", async () => {
       `(business rule: ${business_rule_flag ? "flag for outreach" : "no flag"})`;
   } catch (err) {
     upsellResultEl.textContent = `Could not get a prediction: ${err.message}`;
+  }
+});
+
+document.getElementById("super-customer-submit").addEventListener("click", async () => {
+  superCustomerResultEl.textContent = "Scoring...";
+  try {
+    const res = await fetch("/api/predict/super-customer-score", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentAccessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(readProfileForm()),
+    });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const { super_customer_score } = await res.json();
+    superCustomerResultEl.textContent = `Super-customer score: ${super_customer_score} / 100`;
+  } catch (err) {
+    superCustomerResultEl.textContent = `Could not get a score: ${err.message}`;
   }
 });
 
