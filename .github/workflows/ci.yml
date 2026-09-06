@@ -28,4 +28,4 @@ jobs:
           SUPABASE_URL: https://fake.supabase.co
           SUPABASE_ANON_KEY: fake-anon-key
           SUPABASE_SERVICE_ROLE_KEY: fake-service-role-key
-        run: pytest
+        run: python -m pytest
