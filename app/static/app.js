@@ -5,6 +5,7 @@ const loginSubmit = document.getElementById("login-submit");
 const errorEl = document.getElementById("error");
 const userEmailEl = document.getElementById("user-email");
 const dashboardEl = document.getElementById("dashboard");
+const tierPanelEl = document.getElementById("tier-panel");
 
 let supabaseClient;
 
@@ -27,6 +28,7 @@ function render(session) {
     dashboardView.hidden = false;
     userEmailEl.textContent = session.user.email;
     loadDashboard(session.access_token);
+    loadConversionByTier(session.access_token);
   } else {
     loginView.hidden = false;
     dashboardView.hidden = true;
@@ -53,6 +55,31 @@ async function loadDashboard(accessToken) {
     `;
   } catch (err) {
     dashboardEl.textContent = `Could not load data: ${err.message}`;
+  }
+}
+
+async function loadConversionByTier(accessToken) {
+  tierPanelEl.textContent = "Loading budget-tier analysis...";
+  try {
+    const res = await fetch("/api/insights/conversion-by-budget-tier", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const { row_count, tiers } = await res.json();
+
+    const rows = tiers
+      .map((t) => `<tr><td>${t.label}</td><td>${(t.conversion_rate * 100).toFixed(1)}%</td></tr>`)
+      .join("");
+
+    tierPanelEl.innerHTML = `
+      <table>
+        <thead><tr><th>Budget tier</th><th>Conversion rate</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p><small>Computed live from all ${row_count} rows in Supabase (Package 1 finding).</small></p>
+    `;
+  } catch (err) {
+    tierPanelEl.textContent = `Could not load tier analysis: ${err.message}`;
   }
 }
 
