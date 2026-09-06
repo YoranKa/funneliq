@@ -6,6 +6,7 @@ const errorEl = document.getElementById("error");
 const userEmailEl = document.getElementById("user-email");
 const dashboardEl = document.getElementById("dashboard");
 const tierPanelEl = document.getElementById("tier-panel");
+const dropoutPanelEl = document.getElementById("dropout-panel");
 const profileForm = document.getElementById("profile-form");
 const ltvResultEl = document.getElementById("ltv-result");
 const upsellResultEl = document.getElementById("upsell-result");
@@ -43,6 +44,7 @@ function render(session) {
     currentAccessToken = session.access_token;
     loadDashboard(session.access_token);
     loadConversionByTier(session.access_token);
+    loadFollowupDropout(session.access_token);
   } else {
     loginView.hidden = false;
     dashboardView.hidden = true;
@@ -94,6 +96,45 @@ async function loadConversionByTier(accessToken) {
     `;
   } catch (err) {
     tierPanelEl.textContent = `Could not load tier analysis: ${err.message}`;
+  }
+}
+
+async function loadFollowupDropout(accessToken) {
+  dropoutPanelEl.textContent = "Loading follow-up dropout analysis...";
+  try {
+    const res = await fetch("/api/insights/followup-dropout", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    const { row_count, stage_dropout, profit_by_calls, recommendation } = await res.json();
+
+    const maxDropout = Math.max(...stage_dropout.map((s) => s.dropout_rate));
+    const dropoutBars = stage_dropout
+      .map(
+        (s) => `
+        <div class="bar-row">
+          <span>${s.stage}</span>
+          <span class="bar-track"><span class="bar-fill" style="width:${(s.dropout_rate / maxDropout) * 100}%"></span></span>
+          <span>${(s.dropout_rate * 100).toFixed(1)}%</span>
+        </div>`
+      )
+      .join("");
+
+    const profitRows = profit_by_calls
+      .map((p) => `<tr><td>${p.calls_to_closed}</td><td>&#8362;${p.avg_profit_per_deal.toLocaleString()}</td><td>${p.count}</td></tr>`)
+      .join("");
+
+    dropoutPanelEl.innerHTML = `
+      <p><small>Dropout rate per follow-up stage, computed live from all ${row_count} rows in Supabase:</small></p>
+      ${dropoutBars}
+      <table>
+        <thead><tr><th>Calls to close</th><th>Avg. profit/deal</th><th>Deals</th></tr></thead>
+        <tbody>${profitRows}</tbody>
+      </table>
+      <p id="dropout-recommendation"><small><b>Recommendation:</b> ${recommendation}</small></p>
+    `;
+  } catch (err) {
+    dropoutPanelEl.textContent = `Could not load dropout analysis: ${err.message}`;
   }
 }
 

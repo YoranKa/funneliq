@@ -50,6 +50,11 @@
     #profile-form .checkbox { flex-direction: row; align-items: center; }
     #profile-form button { grid-column: span 1; width: fit-content; }
     #ltv-result, #upsell-result, #super-customer-result { margin-top: 0.75rem; font-size: 1.1rem; }
+    .bar-row { display: grid; grid-template-columns: 12rem 1fr 3.5rem; align-items: center; gap: 0.5rem; margin: 0.25rem 0; font-size: 0.9rem; }
+    .bar-track { background: #ddd; border-radius: 3px; height: 0.9rem; overflow: hidden; }
+    .bar-fill { background: #2563eb; height: 100%; }
+    @media (prefers-color-scheme: dark) { .bar-track { background: #333; } }
+    #dropout-recommendation { max-width: 640px; margin-top: 0.5rem; }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -98,6 +103,9 @@
     <div id="ltv-result"></div>
     <div id="upsell-result"></div>
     <div id="super-customer-result"></div>
+
+    <h2>Package 5 &mdash; follow-up dropout</h2>
+    <div id="dropout-panel">Loading follow-up dropout analysis...</div>
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
