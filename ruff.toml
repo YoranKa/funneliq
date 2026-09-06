@@ -1,0 +1,4 @@
+# Lint only the shipped app and its tests - notebooks/ are exploratory
+# analysis, not production code, so import-order nits there aren't worth
+# enforcing.
+extend-exclude = ["notebooks/"]

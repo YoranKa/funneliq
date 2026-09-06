@@ -18,9 +18,9 @@ from pathlib import Path
 import pandas as pd
 from catboost import CatBoostClassifier, CatBoostRegressor
 from dotenv import load_dotenv
-from lightgbm import LGBMRegressor
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
+from lightgbm import LGBMRegressor
 from postgrest.exceptions import APIError
 from pydantic import BaseModel
 from supabase import create_client
