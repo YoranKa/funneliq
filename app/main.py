@@ -12,13 +12,16 @@ user-facing request.
 """
 
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import pandas as pd
+from catboost import CatBoostRegressor
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
 from postgrest.exceptions import APIError
+from pydantic import BaseModel
 from supabase import create_client
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -26,8 +29,41 @@ load_dotenv(ROOT / ".env")
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_ANON_KEY = os.environ["SUPABASE_ANON_KEY"]
+SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
 
-app = FastAPI(title="FunnelIQ")
+# Same feature list, target, and model as notebooks/02_ltv_regression.ipynb -
+# see docs/package_1_findings.md-style reasoning there for why cumulative_profit
+# / upsell / referred are excluded as leakage.
+LTV_FEATURES = [
+    "ad_budget", "num_leads", "leads_answered", "leads_not_answered",
+    "followup_1", "followup_2", "followup_3", "followup_4", "followup_5",
+    "not_closed", "closed", "calls_to_closed", "calls_to_not_closed",
+    "customer_acquisition_cost", "purchased",
+]
+
+_ltv_model: CatBoostRegressor | None = None
+
+
+def _train_ltv_model() -> CatBoostRegressor:
+    # Admin/bulk operation (trains on the whole table), like db/load_data.py -
+    # uses the service-role key server-side only, never sent to the browser.
+    admin_client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+    rows = _fetch_all_rows(admin_client, ",".join(LTV_FEATURES + ["ltv_months"]))
+    df = pd.DataFrame(rows).dropna(subset=["ltv_months"])
+
+    model = CatBoostRegressor(random_state=42, verbose=False)
+    model.fit(df[LTV_FEATURES], df["ltv_months"])
+    return model
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global _ltv_model
+    _ltv_model = _train_ltv_model()
+    yield
+
+
+app = FastAPI(title="FunnelIQ", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -130,6 +166,44 @@ def conversion_by_budget_tier(authorization: str | None = Header(default=None)):
             for label, rate in by_tier.items()
         ],
     }
+
+
+class LtvPredictionRequest(BaseModel):
+    ad_budget: float
+    num_leads: float
+    leads_answered: float
+    leads_not_answered: float
+    followup_1: float
+    followup_2: float
+    followup_3: float
+    followup_4: float
+    followup_5: float
+    not_closed: float
+    closed: float
+    calls_to_closed: float
+    calls_to_not_closed: float
+    customer_acquisition_cost: float
+    purchased: bool
+
+
+@app.post("/api/predict/ltv")
+def predict_ltv(payload: LtvPredictionRequest, authorization: str | None = Header(default=None)):
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=401, detail="Missing bearer token")
+    token = authorization.split(" ", 1)[1]
+
+    # This endpoint doesn't read any RLS-scoped rows itself (the model
+    # already lives in memory), but it still checks for a real, valid
+    # session the same way every other endpoint does.
+    client = _client_for_user(token)
+    try:
+        client.table("funnel_records").select("id").limit(1).execute()
+    except APIError as exc:
+        raise HTTPException(status_code=401, detail="Invalid or expired session") from exc
+
+    row = pd.DataFrame([payload.model_dump()])[LTV_FEATURES]
+    predicted_months = float(_ltv_model.predict(row)[0])
+    return {"predicted_ltv_months": round(predicted_months, 1)}
 
 
 app.mount("/", StaticFiles(directory=ROOT / "app" / "static", html=True), name="static")
