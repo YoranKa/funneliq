@@ -193,6 +193,7 @@
         </tbody>
       </table>
       <p class="headline">נבחר <b>CatBoost</b> — אבל בהפרש קטן משני האחרים. המודל טועה בממוצע ב-~3 חודשים, על טווח <code>ltv_months</code> של 1–56 (ממוצע 22, סטיית תקן 12.5).</p>
+      <p><small>🟢 חי באפליקציה הפרוסה: <code>POST /api/predict/ltv</code> — מודל CatBoost שמתאמן מול Supabase בעליית השרת, עם טופס בדשבורד לנסות תחזית על פרופיל לקוח.</small></p>
     </div>
 
     <div class="card">
@@ -399,6 +400,25 @@
     </div>
   </section>
 
+  <section id="infra">
+    <div class="section-head"><span class="section-num">·</span><h2>תשתית — Supabase + Railway</h2></div>
+
+    <div class="card">
+      <h3>Supabase: DB + Auth + RLS</h3>
+      <p class="headline">טבלת <code>funnel_records</code> (<code>db/schema.sql</code>) עם Row Level Security מופעל — policy אחד: כל משתמש מחובר רואה הכל (כלי פנימי לצוות אחד, לא multi-tenant). הטעינה החד-פעמית (<code>db/load_data.py</code>) משתמשת ב-<code>service_role</code> key; כל בקשה של משתמש-קצה עוברת עם ה-<b>anon key + הטוקן החתום של המשתמש עצמו</b> — כך שה-RLS באמת אוכף, לא רק קישוט בקובץ schema.</p>
+    </div>
+
+    <div class="card">
+      <h3>Railway: פריסה + חיבור אוטומטי ל-GitHub</h3>
+      <p class="headline">האפליקציה (FastAPI) פרוסה דרך <b>Dockerfile</b> מפורש (לא זיהוי אוטומטי — הקוד יושב תחת <code>app/</code>, לא בשורש הריפו). Railway מחובר ל-GitHub עם deployment trigger פעיל: כל <code>push</code> ל-<code>main</code> מפעיל build+deploy אוטומטי, בלי לגעת ב-CLI.</p>
+    </div>
+
+    <div class="principles">
+      <span class="principle"><b>19</b> builder אוטומטי לא תמיד מזהה נכון — Dockerfile מפורש חוסך ניחושים</span>
+      <span class="principle"><b>20</b> חיבור GitHub↔Railway דורש גם הרשאת GitHub App וגם deployment trigger — לא מספיק להגדיר repo/branch</span>
+    </div>
+  </section>
+
   <section id="next">
     <div class="section-head"><span class="section-num">·</span><h2>מצב הפרויקט</h2></div>
     <ul class="roadmap">
@@ -411,7 +431,7 @@
       <li class="done">Supabase — מסד נתונים + התחברות</li>
       <li class="done">Railway — פריסה + חיבור אוטומטי ל-GitHub</li>
       <li>GitHub Actions — CI</li>
-      <li>חשיפת חבילות 2–6 כ-endpoints באפליקציה החיה</li>
+      <li>חשיפת חבילות 3–6 כ-endpoints באפליקציה החיה (1–2 כבר חיות)</li>
     </ul>
   </section>
 
